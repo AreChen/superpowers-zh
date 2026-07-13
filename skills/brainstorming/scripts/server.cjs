@@ -161,7 +161,7 @@ const MIME_TYPES = {
 function waitingPage() {
   return renderBranding(`<!DOCTYPE html>
 <html>
-<head><meta charset="utf-8"><title>Brainstorm Companion</title>
+<head><meta charset="utf-8"><title>头脑风暴伴侣</title>
 <style>
 body { font-family: system-ui, sans-serif; padding: 2rem; max-width: 800px; margin: 0 auto; }
 h1 { color: #333; } p { color: #666; }
@@ -171,25 +171,25 @@ h1 { color: #333; } p { color: #666; }
 .brand-logo { display: block; height: 1em; width: auto; max-width: 180px; filter: invert(1); }
 </style>
 </head>
-<body><!-- BRANDING --><h1>Brainstorm Companion</h1>
-<p>Waiting for the agent to push a screen...</p></body></html>`);
+<body><!-- BRANDING --><h1>头脑风暴伴侣</h1>
+<p>正在等待 Agent 推送界面…</p></body></html>`);
 }
 
 const FORBIDDEN_PAGE = `<!DOCTYPE html>
 <html>
-<head><meta charset="utf-8"><title>Session key required</title>
+<head><meta charset="utf-8"><title>需要会话密钥</title>
 <style>body { font-family: system-ui, sans-serif; padding: 2rem; max-width: 800px; margin: 0 auto; }
 h1 { color: #333; } p { color: #666; } code { background: #f0f0f0; padding: 0.1em 0.3em; border-radius: 4px; }</style>
 </head>
-<body><h1>Session key required</h1>
-<p>This page needs the full URL your coding agent gave you, including the
-<code>?key=&hellip;</code> part. Copy the complete URL and open it again.</p></body></html>`;
+<body><h1>需要会话密钥</h1>
+<p>本页面需要编程 Agent 提供的完整 URL，其中必须包含
+<code>?key=&hellip;</code> 部分。请复制完整 URL 后重新打开。</p></body></html>`;
 
 function bootstrapPage(key) {
   const jsonKey = JSON.stringify(String(key));
   return `<!DOCTYPE html>
 <html>
-<head><meta charset="utf-8"><title>Opening Brainstorm Companion</title></head>
+<head><meta charset="utf-8"><title>正在打开头脑风暴伴侣</title></head>
 <body>
 <script>
 try { sessionStorage.setItem('brainstorm-session-key', ${jsonKey}); } catch (e) {}

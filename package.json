@@ -1,7 +1,7 @@
 {
   "name": "superpowers",
   "version": "6.1.1",
-  "description": "Superpowers skills and runtime bootstrap for coding agents",
+  "description": "面向编程 Agent 的 Superpowers 中文技能库与运行时引导",
   "type": "module",
   "main": ".opencode/plugins/superpowers.js",
   "keywords": [

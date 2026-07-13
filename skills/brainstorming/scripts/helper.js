@@ -48,10 +48,10 @@
     const el = document.querySelector('.status');
     if (!el) return;
     const map = {
-      connecting:   ['Connecting…',   'var(--text-tertiary)'],
-      connected:    ['Connected',     'var(--success)'],
-      reconnecting: ['Reconnecting…', 'var(--warning)'],
-      disconnected: ['Disconnected',  'var(--error)']
+      connecting:   ['正在连接…',     'var(--text-tertiary)'],
+      connected:    ['已连接',        'var(--success)'],
+      reconnecting: ['正在重新连接…', 'var(--warning)'],
+      disconnected: ['已断开连接',    'var(--error)']
     };
     const [text, color] = map[state] || map.disconnected;
     el.textContent = text;
@@ -68,9 +68,9 @@
       'align-items:center;justify-content:center;padding:2rem;text-align:center;' +
       'background:rgba(20,20,22,0.92);color:#f5f5f7;font-family:system-ui,sans-serif';
     el.innerHTML = '<div style="max-width:480px">' +
-      '<h2 style="margin:0 0 .5rem;font-weight:600">Companion paused</h2>' +
-      '<p style="margin:0;opacity:.85">This brainstorm companion has stopped. ' +
-      'Ask your coding agent to bring it back — this page reconnects automatically.</p></div>';
+      '<h2 style="margin:0 0 .5rem;font-weight:600">伴侣已暂停</h2>' +
+      '<p style="margin:0;opacity:.85">头脑风暴伴侣已停止。' +
+      '请让你的编程 Agent 重新启动它——本页面会自动重新连接。</p></div>';
     if (document.body) document.body.appendChild(el);
   }
 

@@ -1,8 +1,8 @@
 /**
- * Superpowers plugin for OpenCode.ai
+ * OpenCode.ai 的 Superpowers 插件
  *
- * Injects superpowers bootstrap context via message transform.
- * Auto-registers skills directory via config hook (no symlinks needed).
+ * 通过消息转换注入 Superpowers 启动上下文。
+ * 通过配置钩子自动注册技能目录（无需符号链接）。
  */
 
 import path from 'path';
@@ -12,16 +12,16 @@ import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// Simple frontmatter extraction (avoid dependency on skills-core for bootstrap)
+// 简单提取 frontmatter（避免启动过程依赖 skills-core）
 const extractAndStripFrontmatter = (content) => {
-  const match = content.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
+  const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n([\s\S]*)$/);
   if (!match) return { frontmatter: {}, content };
 
   const frontmatterStr = match[1];
   const body = match[2];
   const frontmatter = {};
 
-  for (const line of frontmatterStr.split('\n')) {
+  for (const line of frontmatterStr.split(/\r?\n/)) {
     const colonIdx = line.indexOf(':');
     if (colonIdx > 0) {
       const key = line.slice(0, colonIdx).trim();
@@ -33,7 +33,7 @@ const extractAndStripFrontmatter = (content) => {
   return { frontmatter, content: body };
 };
 
-// Normalize a path: trim whitespace, expand ~, resolve to absolute
+// 规范化路径：去除首尾空白、展开 ~ 并解析为绝对路径
 const normalizePath = (p, homeDir) => {
   if (!p || typeof p !== 'string') return null;
   let normalized = p.trim();
@@ -46,11 +46,11 @@ const normalizePath = (p, homeDir) => {
   return path.resolve(normalized);
 };
 
-// Module-level cache for bootstrap content.
-// The SKILL.md file does not change during a session, so reading + parsing it
-// once eliminates redundant fs.existsSync + fs.readFileSync + regex work on
-// every agent step.  See #1202 for the full analysis.
-let _bootstrapCache = undefined; // undefined = not yet loaded, null = file missing
+// 启动内容的模块级缓存。
+// SKILL.md 在会话期间不会变化，因此只需读取并解析一次，便可避免在每个
+// Agent 步骤中重复执行 fs.existsSync、fs.readFileSync 和正则处理。
+// 完整分析见 #1202。
+let _bootstrapCache = undefined; // undefined = 尚未加载，null = 文件不存在
 
 export const SuperpowersPlugin = async ({ client, directory }) => {
   const homeDir = os.homedir();
@@ -58,12 +58,12 @@ export const SuperpowersPlugin = async ({ client, directory }) => {
   const envConfigDir = normalizePath(process.env.OPENCODE_CONFIG_DIR, homeDir);
   const configDir = envConfigDir || path.join(homeDir, '.config/opencode');
 
-  // Helper to generate bootstrap content (cached after first call)
+  // 生成启动内容的辅助函数（首次调用后缓存）
   const getBootstrapContent = () => {
-    // Return cached result on subsequent calls
+    // 后续调用直接返回缓存结果
     if (_bootstrapCache !== undefined) return _bootstrapCache;
 
-    // Try to load using-superpowers skill
+    // 尝试加载 using-superpowers 技能
     const skillPath = path.join(superpowersSkillsDir, 'using-superpowers', 'SKILL.md');
     if (!fs.existsSync(skillPath)) {
       _bootstrapCache = null;
@@ -73,23 +73,23 @@ export const SuperpowersPlugin = async ({ client, directory }) => {
     const fullContent = fs.readFileSync(skillPath, 'utf8');
     const { content } = extractAndStripFrontmatter(fullContent);
 
-    const toolMapping = `**Tool Mapping for OpenCode:**
-When skills request actions, substitute OpenCode equivalents:
-- Create or update todos → \`todowrite\`
-- \`Subagent (general-purpose):\` → \`task\` with \`subagent_type: "general"\`
-- Invoke a skill → OpenCode's native \`skill\` tool
-- Read files → \`read\`
-- Create, edit, or delete files → \`apply_patch\`
-- Run shell commands → \`bash\`
-- Search files → \`grep\`, \`glob\`
-- Fetch a URL → \`webfetch\`
+    const toolMapping = `**OpenCode 工具映射：**
+当技能要求执行操作时，请替换为对应的 OpenCode 工具：
+- 创建或更新待办事项 → \`todowrite\`
+- \`Subagent (general-purpose):\` → 使用 \`task\`，并设置 \`subagent_type: "general"\`
+- 调用技能 → OpenCode 原生 \`skill\` 工具
+- 读取文件 → \`read\`
+- 创建、编辑或删除文件 → \`apply_patch\`
+- 运行 Shell 命令 → \`bash\`
+- 搜索文件 → \`grep\`、\`glob\`
+- 获取 URL → \`webfetch\`
 
-Use OpenCode's native \`skill\` tool to list and load skills.`;
+使用 OpenCode 原生 \`skill\` 工具列出并加载技能。`;
 
     _bootstrapCache = `<EXTREMELY_IMPORTANT>
-You have superpowers.
+你拥有 Superpowers。
 
-**IMPORTANT: The using-superpowers skill content is included below. It is ALREADY LOADED - you are currently following it. Do NOT use the skill tool to load "using-superpowers" again - that would be redundant.**
+**重要：下方已包含 using-superpowers 技能内容。该技能已经加载，你当前正在遵循它。不要再次使用 skill 工具加载 "using-superpowers"，否则只会造成重复。**
 
 ${content}
 
@@ -100,10 +100,9 @@ ${toolMapping}
   };
 
   return {
-    // Inject skills path into live config so OpenCode discovers superpowers skills
-    // without requiring manual symlinks or config file edits.
-    // This works because Config.get() returns a cached singleton — modifications
-    // here are visible when skills are lazily discovered later.
+    // 将技能路径注入实时配置，让 OpenCode 无需手动创建符号链接或编辑
+    // 配置文件即可发现 Superpowers 技能。
+    // Config.get() 返回缓存的单例，因此稍后延迟发现技能时可以看到这里的修改。
     config: async (config) => {
       config.skills = config.skills || {};
       config.skills.paths = config.skills.paths || [];
@@ -112,24 +111,22 @@ ${toolMapping}
       }
     },
 
-    // Inject bootstrap into the first user message of each session.
-    // Using a user message instead of a system message avoids:
-    //   1. Token bloat from system messages repeated every turn (#750)
-    //   2. Multiple system messages breaking Qwen and other models (#894)
+    // 将启动内容注入每个会话的第一条用户消息。
+    // 使用用户消息而不是系统消息可避免：
+    //   1. 每轮重复系统消息造成的 Token 膨胀（#750）
+    //   2. 多条系统消息破坏 Qwen 等模型的行为（#894）
     //
-    // The hook fires on every agent step (not just every turn) because
-    // opencode's prompt.ts reloads messages from DB each step.  Fresh message
-    // arrays may need injection again, so getBootstrapContent() must not do
-    // repeated disk work.
+    // 该钩子会在每个 Agent 步骤触发（而不只是每轮），因为 OpenCode 的
+    // prompt.ts 会在每一步从数据库重新加载消息。新的消息数组可能需要再次
+    // 注入，因此 getBootstrapContent() 不能重复进行磁盘操作。
     'experimental.chat.messages.transform': async (_input, output) => {
       const bootstrap = getBootstrapContent();
       if (!bootstrap || !output.messages.length) return;
       const firstUser = output.messages.find(m => m.info.role === 'user');
       if (!firstUser || !firstUser.parts.length) return;
 
-      // Guard: skip if first user message already contains bootstrap.
-      // This prevents double injection when OpenCode passes an already
-      // transformed in-memory message array through the hook again.
+      // 防护：如果第一条用户消息已经包含启动内容，则跳过。
+      // 这样可防止 OpenCode 再次把已转换的内存消息数组传入钩子时重复注入。
       if (firstUser.parts.some(p => p.type === 'text' && p.text.includes('EXTREMELY_IMPORTANT'))) return;
 
       const ref = firstUser.parts[0];

@@ -157,9 +157,9 @@ async function runTests() {
       assert.strictEqual(res.status, 403, 'no-key request must be 403');
     });
 
-    await test('403 page names "coding agent" and the key', async () => {
+    await test('403 page names the localized coding Agent and the key', async () => {
       const res = await get('/');
-      assert(/coding agent/i.test(res.body), '403 body should reference the coding agent');
+      assert(/编程 Agent/i.test(res.body), '403 body should reference the localized coding Agent');
       assert(/key/i.test(res.body), '403 body should mention the key');
     });
 

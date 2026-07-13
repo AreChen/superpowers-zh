@@ -1,12 +1,12 @@
 {
   "name": "superpowers",
   "version": "6.1.1",
-  "description": "An agentic skills framework and software development methodology.",
+  "description": "面向 Agent 的中文技能框架与软件开发方法论。",
   "author": {
     "name": "Jesse Vincent",
     "email": "jesse@fsck.com"
   },
-  "homepage": "https://github.com/obra/superpowers",
+  "homepage": "https://github.com/AreChen/superpowers-zh",
   "license": "MIT",
   "keywords": [
     "brainstorming",
@@ -22,17 +22,17 @@
   "sessionStart": {
     "skill": "using-superpowers"
   },
-  "skillInstructions": "Kimi Code tool mapping for Superpowers skills:\n\n- When a Superpowers skill says to ask the user, ask clarifying questions, ask one question at a time, present multiple-choice options, use the terminal for a question, or wait for the user's choice, call Kimi Code's `AskUserQuestion` tool. Do not render those choices as plain assistant text unless `AskUserQuestion` is unavailable or the session is in auto permission mode.\n- For `AskUserQuestion`, provide 1 question with 2-4 concrete options when possible. Put the recommended option first and suffix its label with `(Recommended)`.\n- When a Superpowers skill refers to `TodoWrite`, use Kimi Code's `TodoList` tool.\n- When a Superpowers skill says `Task tool (general-purpose)` or asks you to dispatch an implementer/reviewer subagent, use Kimi Code's `Agent` tool with a Kimi subagent type. Do not pass `general-purpose` as `subagent_type`.\n- For implementation, code review, spec review, quality review, and filled Superpowers subagent prompt templates, call `Agent` with `subagent_type: \"coder\"`, paste the fully filled prompt into `prompt`, and provide a short `description`.\n- For read-only codebase exploration that would take several searches, use `Agent` with `subagent_type: \"explore\"`.\n- For read-only planning or architecture design, use `Agent` with `subagent_type: \"plan\"`.\n- Keep dependent Superpowers subagent steps sequential. Use multiple `Agent` calls, or `run_in_background: true` only when the work is independent and background agents are available.\n- When a Superpowers skill refers to the `Skill` tool, use Kimi Code's native `Skill` tool.\n- Use Kimi Code's `Read`, `Write`, `Edit`, `Bash`, `Grep`, `Glob`, `FetchURL`, `WebSearch`, and MCP tools by their actual exposed names.\n- When a skill asks to search file contents, use `Grep`; when it asks to find files by path or pattern, use `Glob`; when it asks to fetch a URL, use `FetchURL`; when it asks to search the web, use `WebSearch`.",
+  "skillInstructions": "Superpowers 技能在 Kimi Code 中的工具映射：\n\n- 当 Superpowers 技能要求询问用户、提出澄清问题、一次只问一个问题、提供多项选择、通过终端提问或等待用户选择时，调用 Kimi Code 的 `AskUserQuestion` 工具。除非 `AskUserQuestion` 不可用，或会话处于自动权限模式，否则不要把这些选项直接渲染成普通助手文本。\n- 使用 `AskUserQuestion` 时，尽可能只提供 1 个问题和 2–4 个具体选项。把推荐项放在最前面，并在标签后添加 `(Recommended)`。\n- 当 Superpowers 技能提到 `TodoWrite` 时，使用 Kimi Code 的 `TodoList` 工具。\n- 当 Superpowers 技能写明 `Task tool (general-purpose)`，或要求分派实现/审查子 Agent 时，使用 Kimi Code 的 `Agent` 工具并选择 Kimi 子 Agent 类型。不要把 `general-purpose` 作为 `subagent_type` 传入。\n- 对实现、代码审查、规格审查、质量审查以及已填写的 Superpowers 子 Agent 提示词模板，调用 `Agent`，设置 `subagent_type: \"coder\"`，把完整提示词粘贴到 `prompt`，并提供简短的 `description`。\n- 对需要多次搜索的只读代码库探索，使用 `Agent` 并设置 `subagent_type: \"explore\"`。\n- 对只读规划或架构设计，使用 `Agent` 并设置 `subagent_type: \"plan\"`。\n- 有依赖关系的 Superpowers 子 Agent 步骤必须顺序执行。只有工作彼此独立且后台 Agent 可用时，才使用多个 `Agent` 调用或 `run_in_background: true`。\n- 当 Superpowers 技能提到 `Skill` 工具时，使用 Kimi Code 原生的 `Skill` 工具。\n- 按 Kimi Code 实际暴露的名称使用 `Read`、`Write`、`Edit`、`Bash`、`Grep`、`Glob`、`FetchURL`、`WebSearch` 和 MCP 工具。\n- 技能要求搜索文件内容时使用 `Grep`；按路径或模式查找文件时使用 `Glob`；获取 URL 时使用 `FetchURL`；搜索网页时使用 `WebSearch`。",
   "interface": {
-    "displayName": "Superpowers",
-    "shortDescription": "Planning, TDD, debugging, and delivery workflows for coding agents",
-    "longDescription": "Use Superpowers to guide agent work through brainstorming, implementation planning, test-driven development, systematic debugging, parallel execution, code review, and finish-the-branch workflows.",
+    "displayName": "Superpowers 中文版",
+    "shortDescription": "面向编程 Agent 的规划、TDD、调试与交付工作流",
+    "longDescription": "使用 Superpowers 中文版引导 Agent 完成头脑风暴、实施规划、测试驱动开发、系统化调试、并行执行、代码审查和分支收尾工作流。",
     "developerName": "Jesse Vincent",
     "capabilities": [
       "Interactive",
       "Read",
       "Write"
     ],
-    "websiteURL": "https://github.com/obra/superpowers"
+    "websiteURL": "https://github.com/AreChen/superpowers-zh"
   }
 }

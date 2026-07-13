@@ -25,7 +25,7 @@ def assert_equal(actual, expected, label):
 assert_equal(marketplace.get("name"), "superpowers-dev", "marketplace name")
 assert_equal(
     marketplace.get("interface", {}).get("displayName"),
-    "Superpowers Dev",
+    "Superpowers 中文版开发版",
     "marketplace display name",
 )
 

@@ -3,8 +3,8 @@ import { pathToFileURL } from 'url';
 
 const [, , pluginPath, scenario] = process.argv;
 
-if (!pluginPath || !['present', 'missing'].includes(scenario)) {
-  console.error('Usage: node test-bootstrap-caching.mjs PLUGIN_PATH present|missing');
+if (!pluginPath || !['present', 'present-crlf', 'missing'].includes(scenario)) {
+  console.error('Usage: node test-bootstrap-caching.mjs PLUGIN_PATH present|present-crlf|missing');
   process.exit(2);
 }
 
@@ -24,6 +24,11 @@ fs.existsSync = function (...args) {
 fs.readFileSync = function (...args) {
   if (isBootstrapSkillPath(args[0])) {
     readCount += 1;
+    const content = originalReadFileSync.apply(this, args);
+    if (scenario === 'present-crlf' && typeof content === 'string') {
+      return content.replace(/\r?\n/g, '\r\n');
+    }
+    return content;
   }
   return originalReadFileSync.apply(this, args);
 };
@@ -46,15 +51,16 @@ const result = {
   secondBootstrapParts: countBootstrapParts(secondOutput),
   staleMentionMapping: bootstrapText(firstOutput).includes('@mention'),
   staleTaskMapping: bootstrapText(firstOutput).includes('`Task` tool with subagents'),
-  mapsSubagentToTask: bootstrapText(firstOutput).includes('`task` with `subagent_type: "general"`'),
+  mapsSubagentToTask: bootstrapText(firstOutput).includes('`task`，并设置 `subagent_type: "general"`'),
   mapsMutationToApplyPatch: bootstrapText(firstOutput).includes('`apply_patch`'),
+  frontmatterLeaked: /\r?\n---\r?\nname:\s*using-superpowers/.test(bootstrapText(firstOutput)),
   firstReadCount: afterFirst.readCount,
   secondReadCount: afterSecond.readCount,
   firstExistsCount: afterFirst.existsCount,
   secondExistsCount: afterSecond.existsCount,
 };
 
-const failures = scenario === 'present'
+const failures = scenario === 'present' || scenario === 'present-crlf'
   ? assertPresentBootstrap(result)
   : assertMissingBootstrap(result);
 
@@ -121,6 +127,9 @@ function assertPresentBootstrap(result) {
   }
   if (!result.mapsMutationToApplyPatch) {
     failures.push('expected OpenCode bootstrap to map file mutation to apply_patch');
+  }
+  if (result.frontmatterLeaked) {
+    failures.push('expected OpenCode bootstrap to strip SKILL.md frontmatter for LF and CRLF files');
   }
   return failures;
 }

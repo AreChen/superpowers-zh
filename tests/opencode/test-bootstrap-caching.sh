@@ -14,6 +14,10 @@ run_present_file_check() {
     node "$SCRIPT_DIR/test-bootstrap-caching.mjs" "$SUPERPOWERS_PLUGIN_FILE" present
 }
 
+run_crlf_file_check() {
+    node "$SCRIPT_DIR/test-bootstrap-caching.mjs" "$SUPERPOWERS_PLUGIN_FILE" present-crlf
+}
+
 run_missing_file_check() {
     mv "$SUPERPOWERS_SKILLS_DIR/using-superpowers/SKILL.md" "$TEST_HOME/using-superpowers.SKILL.md.bak"
 
@@ -24,7 +28,11 @@ echo "Test 1: Caches bootstrap after the first successful transform..."
 run_present_file_check
 echo "  [PASS] Bootstrap content is cached while fresh message arrays still receive injection"
 
-echo "Test 2: Caches missing SKILL.md result..."
+echo "Test 2: Strips frontmatter from a CRLF SKILL.md..."
+run_crlf_file_check
+echo "  [PASS] CRLF skill frontmatter is stripped before bootstrap injection"
+
+echo "Test 3: Caches missing SKILL.md result..."
 run_missing_file_check
 echo "  [PASS] Missing bootstrap file is cached and not re-probed every transform"
 

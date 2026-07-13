@@ -59,14 +59,14 @@ test('exposes sane constants', () => {
 console.log('\n--- Wiring (source) ---');
 
 test('reflects all three connection states', () => {
-  assert(/Connected/.test(src) && /Reconnecting/.test(src) && /Disconnected/.test(src),
-    'should set Connected / Reconnecting / Disconnected status');
+  assert(/已连接/.test(src) && /正在重新连接/.test(src) && /已断开连接/.test(src),
+    'should set localized connected / reconnecting / disconnected status');
   assert(src.includes("setProperty('--status-color'"), 'drives the status dot via --status-color');
 });
 
 test('renders a tombstone overlay when paused', () => {
   assert(src.includes('bs-tombstone'), 'creates the tombstone element');
-  assert(/Companion paused/.test(src), 'tombstone explains the companion paused');
+  assert(/伴侣已暂停/.test(src), 'tombstone explains the companion paused in Chinese');
 });
 
 test('hardens reconnection (onerror, null socket, clears pending timer)', () => {
@@ -148,9 +148,9 @@ test('uses cookie-only WebSocket URL when no sessionStorage key is present', () 
 test('on disconnect shows Reconnecting and schedules a 500ms reconnect', () => {
   const e = makeEnv(); e.boot();
   e.last().open();
-  assert.strictEqual(e.statusEl.textContent, 'Connected');
+  assert.strictEqual(e.statusEl.textContent, '已连接');
   e.last().close();
-  assert.strictEqual(e.statusEl.textContent, 'Reconnecting…');
+  assert.strictEqual(e.statusEl.textContent, '正在重新连接…');
   assert.strictEqual(e.state.timers[e.state.timers.length - 1].ms, 500);
 });
 
@@ -167,7 +167,7 @@ test('shows the tombstone and Disconnected after the grace period', () => {
   e.last().open(); e.last().close();
   e.advance(20000);          // past TOMBSTONE_AFTER_MS while still down
   e.fireReconnect(); e.last().close();
-  assert.strictEqual(e.statusEl.textContent, 'Disconnected');
+  assert.strictEqual(e.statusEl.textContent, '已断开连接');
   assert.strictEqual(e.state.appended.length, 1, 'tombstone appended exactly once');
 });
 

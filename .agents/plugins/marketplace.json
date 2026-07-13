@@ -1,7 +1,7 @@
 {
   "name": "superpowers-dev",
   "interface": {
-    "displayName": "Superpowers Dev"
+    "displayName": "Superpowers 中文版开发版"
   },
   "plugins": [
     {
