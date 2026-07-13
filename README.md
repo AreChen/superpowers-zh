@@ -4,6 +4,15 @@ Superpowers 是一套面向编程 Agent 的完整软件开发方法论。它由�
 
 本项目是 [obra/superpowers](https://github.com/obra/superpowers) 的中文分叉版本，主要面向使用 Codex、OpenCode 的中文用户，同时兼容 Windows、Linux 和 macOS。
 
+## 版本对齐
+
+- **当前中文发行版：** `v6.1.1-zh.1`
+- **对齐的上游正式版：** [`obra/superpowers v6.1.1`](https://github.com/obra/superpowers/releases/tag/v6.1.1)
+- **上游基线提交：** [`d884ae0`](https://github.com/obra/superpowers/commit/d884ae04edebef577e82ff7c4e143debd0bbec99)
+- **对齐日期：** 2026-07-13
+
+版本号中的 `zh.1` 表示：功能基线与上游 `v6.1.1` 对齐，这是该基线上的第 1 个中文发行版。后续同步新的上游版本时，会先更新前三段版本号，再从 `zh.1` 重新开始计数。
+
 ## 上游正在招聘
 
 Superpowers 上游团队正在招聘一名全职工程师，协助社区运营与代码开发。

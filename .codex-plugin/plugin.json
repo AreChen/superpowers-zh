@@ -1,6 +1,6 @@
 {
   "name": "superpowers",
-  "version": "6.1.1",
+  "version": "6.1.1-zh.1",
   "description": "面向 Agent 的中文技能框架与软件开发方法论：规划、TDD、系统化调试和协作工作流。",
   "author": {
     "name": "Jesse Vincent",

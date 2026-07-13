@@ -1,5 +1,35 @@
 # Superpowers Release Notes
 
+## v6.1.1-zh.1（2026-07-13）
+
+### 上游版本对齐
+
+- **对齐官方版本：** [`obra/superpowers v6.1.1`](https://github.com/obra/superpowers/releases/tag/v6.1.1)。
+- **上游基线提交：** [`d884ae0`](https://github.com/obra/superpowers/commit/d884ae04edebef577e82ff7c4e143debd0bbec99)。
+- **中文发行序号：** `zh.1`，表示这是上游 `v6.1.1` 基线上的第 1 个中文发行版。
+- 保留上游 `v6.1.1` 的 Codex `hooks: {}` 修复、Codex 分类修复以及确定性打包工具等全部功能变更。
+
+### 中文本地化
+
+- 完成全部 14 个核心技能及其提示模板、参考资料、审查模板和调试案例的中文化。
+- 完成 Codex、OpenCode、Claude Code、Cursor、Kimi Code、Gemini 和 Agents 插件清单的中文化。
+- 完成 Brainstorm Visual Companion 等插件可见界面的中文化。
+- 完成根目录 README 的中文化，并把仓库直装地址切换为 `AreChen/superpowers-zh`。
+
+### 中文用户适配
+
+- OpenCode 启动注入和工具映射改为中文。
+- OpenCode frontmatter 解析同时支持 LF 与 Windows CRLF。
+- OpenCode 插件注册测试兼容 POSIX 符号链接和 Windows/Cygwin 文件注册形式。
+- Codex 和 OpenCode 的安装说明优先覆盖 Windows、Linux 和 macOS 用户。
+
+### 验证
+
+- Brainstorm 测试 134 项通过。
+- OpenCode 插件单元测试全部通过。
+- Codex marketplace、Kimi 清单、SessionStart hooks 和 Shell lint 测试通过。
+- 插件 JSON、技能 frontmatter、Markdown 结构、UTF-8 编码和本地链接检查通过。
+
 ## v6.1.1 (2026-07-02)
 
 ### Codex
