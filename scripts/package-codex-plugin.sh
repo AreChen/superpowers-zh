@@ -118,6 +118,15 @@ infer_format_from_output() {
   esac
 }
 
+native_python_path() {
+  local path="$1"
+
+  case "$(uname -s)" in
+    MINGW*|MSYS*|CYGWIN*) cygpath -w "$path" ;;
+    *) printf '%s\n' "$path" ;;
+  esac
+}
+
 if [[ -z "$FORMAT" ]]; then
   FORMAT="$(infer_format_from_output "$OUTPUT" || true)"
   if [[ -z "$FORMAT" ]]; then
@@ -134,13 +143,28 @@ command -v git >/dev/null || die "git not found in PATH"
 command -v jq >/dev/null || die "jq not found in PATH"
 command -v tar >/dev/null || die "tar not found in PATH"
 command -v gzip >/dev/null || die "gzip not found in PATH"
-command -v shasum >/dev/null || die "shasum not found in PATH"
+if command -v shasum >/dev/null 2>&1; then
+  SHA256_TOOL="shasum"
+elif command -v sha256sum >/dev/null 2>&1; then
+  SHA256_TOOL="sha256sum"
+else
+  die "shasum or sha256sum not found in PATH"
+fi
 if [[ "$FORMAT" == "zip" ]]; then
-  command -v zip >/dev/null || die "zip not found in PATH"
   command -v unzip >/dev/null || die "unzip not found in PATH"
+  if command -v zip >/dev/null 2>&1; then
+    ZIP_TOOL="zip"
+  elif command -v python3 >/dev/null 2>&1; then
+    ZIP_TOOL="python3"
+  elif command -v python >/dev/null 2>&1; then
+    ZIP_TOOL="python"
+  else
+    die "zip, python3, or python not found in PATH"
+  fi
 fi
 
-[[ -d "$REPO_ROOT/.git" ]] || die "repo root is not a git checkout: $REPO_ROOT"
+[[ "$(git -C "$REPO_ROOT" rev-parse --is-inside-work-tree 2>/dev/null || true)" == "true" ]] ||
+  die "repo root is not a git checkout: $REPO_ROOT"
 git -C "$REPO_ROOT" rev-parse --verify "$REF^{commit}" >/dev/null ||
   die "git ref does not resolve to a commit: $REF"
 
@@ -293,11 +317,52 @@ case "$FORMAT" in
   zip)
     # ZIP cannot represent dates earlier than 1980.
     TZ=UTC find "$STAGE" -exec touch -t 198001010000 {} +
-    (
-      cd "$STAGE"
+    if [[ "$ZIP_TOOL" == "zip" ]]; then
+      (
+        cd "$STAGE"
+        rm -f "$OUTPUT"
+        COPYFILE_DISABLE=1 zip -X -q - -@ <"$ARCHIVE_LIST" >"$OUTPUT"
+      )
+    else
       rm -f "$OUTPUT"
-      COPYFILE_DISABLE=1 zip -X -q - -@ <"$ARCHIVE_LIST" >"$OUTPUT"
-    )
+      "$ZIP_TOOL" - \
+        "$(native_python_path "$STAGE")" \
+        "$(native_python_path "$ARCHIVE_LIST")" \
+        "$(native_python_path "$OUTPUT")" <<'PY'
+import os
+import stat
+import sys
+import zipfile
+
+stage, archive_list, output = sys.argv[1:]
+with open(archive_list, encoding="utf-8") as paths_file:
+    paths = [line.rstrip("\n") for line in paths_file if line.rstrip("\n")]
+
+with zipfile.ZipFile(
+    output, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9
+) as archive:
+    for relative_path in paths:
+        source_path = os.path.join(stage, *relative_path.split("/"))
+        if os.path.isdir(source_path):
+            info = zipfile.ZipInfo(relative_path.rstrip("/") + "/")
+            info.date_time = (1980, 1, 1, 0, 0, 0)
+            info.create_system = 3
+            info.external_attr = (stat.S_IFDIR | 0o755) << 16
+            archive.writestr(info, b"")
+        else:
+            info = zipfile.ZipInfo(relative_path)
+            info.date_time = (1980, 1, 1, 0, 0, 0)
+            info.create_system = 3
+            info.external_attr = os.stat(source_path).st_mode << 16
+            with open(source_path, "rb") as source_file:
+                archive.writestr(
+                    info,
+                    source_file.read(),
+                    compress_type=zipfile.ZIP_DEFLATED,
+                    compresslevel=9,
+                )
+PY
+    fi
     ;;
   tar.gz)
     # Match the prior official archive's deterministic tar entry metadata:
@@ -341,7 +406,14 @@ if [[ -n "$unexpected_paths" ]]; then
 fi
 
 entry_count="$(printf '%s\n' "$archive_paths" | wc -l | tr -d ' ')"
-checksum="$(shasum -a 256 "$OUTPUT" | awk '{print $1}')"
+case "$SHA256_TOOL" in
+  shasum)
+    checksum="$(shasum -a 256 "$OUTPUT" | awk '{print $1}')"
+    ;;
+  sha256sum)
+    checksum="$(sha256sum "$OUTPUT" | awk '{print $1}')"
+    ;;
+esac
 
 echo "Archive: $OUTPUT"
 echo "Format:  $FORMAT"

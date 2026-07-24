@@ -13,6 +13,15 @@ cleanup() {
 }
 trap cleanup EXIT
 
+python_path() {
+  local path="$1"
+
+  case "$(uname -s)" in
+    MINGW*|MSYS*|CYGWIN*) cygpath -w "$path" ;;
+    *) printf '%s\n' "$path" ;;
+  esac
+}
+
 pass() {
   echo "  [PASS] $1"
 }
@@ -131,6 +140,33 @@ EOF
   done < <(find "$REPO_ROOT/skills" -mindepth 1 -maxdepth 1 -type d -print | sed 's#.*/##' | sort)
 }
 
+write_zip_fixture() {
+  local source="$1"
+  local destination="$2"
+
+  if command -v zip >/dev/null 2>&1; then
+    (
+      cd "$source"
+      zip -X -q -r "$destination" .
+    )
+    return
+  fi
+
+  python3 - "$(python_path "$source")" "$(python_path "$destination")" <<'PY'
+import os
+import sys
+import zipfile
+
+source, destination = sys.argv[1:]
+with zipfile.ZipFile(destination, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+    for root, directories, files in os.walk(source):
+        directories.sort()
+        for filename in sorted(files):
+            path = os.path.join(root, filename)
+            archive.write(path, os.path.relpath(path, source).replace(os.sep, "/"))
+PY
+}
+
 echo "Codex package archive tests"
 
 metadata_source="$TEST_ROOT/metadata-source"
@@ -140,7 +176,8 @@ extracted="$TEST_ROOT/extracted"
 tar_extracted="$TEST_ROOT/tar-extracted"
 write_metadata_fixture "$metadata_source"
 
-source_hooks="$(python3 -c 'import json; print(json.load(open("'"$REPO_ROOT"'/.codex-plugin/plugin.json")).get("hooks"))')"
+source_manifest="$(python_path "$REPO_ROOT/.codex-plugin/plugin.json")"
+source_hooks="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8")).get("hooks"))' "$source_manifest")"
 assert_equals "$source_hooks" "{}" "source Codex manifest suppresses local hook auto-discovery"
 
 if output="$("$SCRIPT_UNDER_TEST" --allow-dirty --metadata-source "$metadata_source" --output "$archive" 2>&1)"; then
@@ -172,7 +209,7 @@ assert_contains "$archive_paths" "assets/app-icon.png" "archive includes app ico
 assert_contains "$archive_paths" "assets/superpowers-small.svg" "archive includes composer icon"
 
 manifest_summary="$(read_archive_file "$archive" .codex-plugin/plugin.json | python3 -c 'import json,sys; data=json.load(sys.stdin); print("\t".join([data["name"], data["version"], data["skills"], str(data.get("hooks"))]))')"
-expected_version="$(python3 -c 'import json; print(json.load(open("'"$REPO_ROOT"'/.codex-plugin/plugin.json"))["version"])')"
+expected_version="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["version"])' "$source_manifest")"
 assert_equals "$manifest_summary" "superpowers	$expected_version	./skills/	$source_hooks" "archive manifest preserves source hooks"
 
 skill_count="$(find "$extracted/skills" -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')"
@@ -225,8 +262,8 @@ archive_from_zip_source="$TEST_ROOT/superpowers-from-zip-source.zip"
 (
   cd "$metadata_source"
   tar -czf "$metadata_archive" .
-  zip -X -q -r "$metadata_zip" .
 )
+write_zip_fixture "$metadata_source" "$metadata_zip"
 
 if output="$("$SCRIPT_UNDER_TEST" --allow-dirty --metadata-source "$metadata_archive" --output "$archive_from_tar_source" 2>&1)"; then
   pass "package script accepts tarball metadata source"
@@ -272,6 +309,7 @@ assert_contains "$missing_output" "ERROR: metadata source is incomplete" "incomp
 
 dirty_repo="$TEST_ROOT/dirty-repo"
 git clone -q --no-local "$REPO_ROOT" "$dirty_repo"
+cp "$SCRIPT_UNDER_TEST" "$dirty_repo/scripts/package-codex-plugin.sh"
 printf '\n# dirty fixture\n' >>"$dirty_repo/README.md"
 set +e
 dirty_output="$(
