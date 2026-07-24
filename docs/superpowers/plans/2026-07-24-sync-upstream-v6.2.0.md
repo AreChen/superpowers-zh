@@ -297,15 +297,15 @@ rtk git commit -m "feat(i18n): sync v6.2.0 testing guidance"
 **接口：**
 
 - 使用：任务 3 的 Finishing RED 场景和上游工作树错误修复
-- 产出：完成菜单不主动提供丢弃选项；显式丢弃仍要求输入分支名确认；清理前保存原工作树路径
+- 产出：完成菜单不主动提供丢弃选项；显式丢弃仍要求精确输入 `discard` 确认；清理前保存原工作树路径
 
 - [ ] **步骤 1：翻译两个技能并保留命令字面量**
 
-保留 `git merge --ff-only`、`git worktree remove`、`git branch -d`、typed confirmation、forge CLI 和 push URL 规则。合理化表格的每一行必须与上游一一对应。
+保留 `git merge <feature-branch>`、`git worktree remove`、`git branch -d`、精确输入 `discard` 的确认、forge CLI 和 push URL 规则。合理化表格的每一行必须与上游一一对应。
 
 - [ ] **步骤 2：运行语义审计和完成菜单 GREEN 测试**
 
-EAPIL 审计必须返回等价。对任务 3 Finishing 场景运行至少 5 个新样本；预期默认选项中没有 discard，只有用户明确要求时才进入输入分支名确认流程。
+EAPIL 审计必须返回等价。对任务 3 Finishing 场景运行至少 5 个新样本；预期默认选项中没有 discard，只有用户明确要求时才进入精确输入 `discard` 的确认流程。
 
 - [ ] **步骤 3：运行工作树测试**
 
