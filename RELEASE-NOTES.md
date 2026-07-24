@@ -15,6 +15,7 @@
 - 默认完成菜单不再主动展示丢弃；只有用户明确要求并精确输入 `discard` 后才允许进入破坏性路径。
 - 恢复 Gemini CLI 安装说明、工具映射和视觉伴侣启动方式。
 - 保留上游 Windows SessionStart Hook 的 `shell: "bash"` 调度，并修正 Windows Git Bash 测试路径归一化。
+- Codex 打包脚本与测试兼容 Windows Git Bash：支持 linked worktree、UTF-8 中文清单、`sha256sum`，并在缺少 `zip` 时使用 Python 标准库生成确定性 ZIP。
 - 面向 Codex、OpenCode 中文用户保留 Windows、Linux、macOS 安装与使用说明。
 
 ## v6.2.0 (2026-07-23)
