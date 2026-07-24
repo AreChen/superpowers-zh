@@ -149,7 +149,7 @@ rtk git commit -m "chore: merge upstream v6.2.0"
 
 **文件：**
 
-- 创建：`docs/superpowers/evals/2026-07-24-v6.2.0-translation-audit.md`
+- 创建：`docs/superpowers/specs/2026-07-24-v6.2.0-translation-eval-results.md`
 - 读取：任务 4–7 列出的英文上游文件和待写中文文件
 - 测试：EAPIL 严格 JSON 输出与行为场景
 
@@ -196,7 +196,7 @@ Windows Hook：用户目录含括号且 Claude Code 由 PowerShell 启动；旧 
 - [ ] **步骤 4：提交 RED 证据**
 
 ```powershell
-rtk git add docs/superpowers/evals/2026-07-24-v6.2.0-translation-audit.md
+rtk git add docs/superpowers/specs/2026-07-24-v6.2.0-translation-eval-results.md
 rtk proxy git diff --cached --check
 rtk git commit -m "test(i18n): record v6.2.0 translation baselines"
 ```
