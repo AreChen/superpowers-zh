@@ -2,7 +2,7 @@
   "name": "superpowers",
   "displayName": "Superpowers 中文版",
   "description": "中文核心技能库：TDD、系统化调试、协作模式与经过验证的工程实践",
-  "version": "6.1.1-zh.1",
+  "version": "6.2.0-zh.1",
   "author": {
     "name": "Jesse Vincent",
     "email": "jesse@fsck.com"
