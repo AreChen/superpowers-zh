@@ -1,18 +1,17 @@
-## Subagent dispatch requires multi-agent support
+## 子 Agent 分派需要多 Agent 支持
 
-Add to your Codex config (`~/.codex/config.toml`):
+添加到你的 Codex 配置（`~/.codex/config.toml`）中：
 
 ```toml
 [features]
 multi_agent = true
 ```
 
-This enables `spawn_agent`, `wait_agent`, and `close_agent` for skills like `dispatching-parallel-agents` and `subagent-driven-development`. When using subagent-driven-development, close reviewer subagents when their review returns. Keep each implementer subagent open until its task's review passes — the fix loop resumes the implementer — then close it. If your harness cannot send another message to a spawned agent, dispatch each fix round as a fresh implementer carrying the brief, the report file, and the findings.
+这将为 `dispatching-parallel-agents` 和 `subagent-driven-development` 等技能启用 `spawn_agent`、`wait_agent` 和 `close_agent`。使用 subagent-driven-development 时，审查者返回审查结果后就关闭它。每个实现者子 Agent 应保持开启，直到其任务通过审查——修复循环会恢复该实现者——然后再关闭。如果你的运行平台无法向已派生的 Agent 再发送消息，则每一轮修复都派遣一个新的实现者，并向它提供简报、报告文件和发现项。
 
-## Environment Detection
+## 环境检测
 
-Skills that create worktrees or finish branches should detect their
-environment with read-only git commands before proceeding:
+创建工作树或完成分支收尾的技能应在继续操作之前，使用只读 git 命令检测其环境：
 
 ```bash
 GIT_DIR=$(cd "$(git rev-parse --git-dir)" 2>/dev/null && pwd -P)
@@ -20,20 +19,16 @@ GIT_COMMON=$(cd "$(git rev-parse --git-common-dir)" 2>/dev/null && pwd -P)
 BRANCH=$(git branch --show-current)
 ```
 
-- `GIT_DIR != GIT_COMMON` → already in a linked worktree (skip creation)
-- `BRANCH` empty → detached HEAD (cannot branch/push/PR from sandbox)
+- `GIT_DIR != GIT_COMMON` → 已经位于链接工作树中（跳过创建）
+- `BRANCH` 为空 → detached HEAD（无法从沙箱创建分支/推送/创建 PR）
 
-See `using-git-worktrees` Step 0 and `finishing-a-development-branch`
-Step 1 for how each skill uses these signals.
+有关每个技能如何使用这些信号，请参阅 `using-git-worktrees` 的步骤 0 和 `finishing-a-development-branch` 的步骤 1。
 
-## Codex App Finishing
+## Codex App 收尾
 
-When the sandbox blocks branch/push operations (detached HEAD in an
-externally managed worktree), the agent commits all work and informs
-the user to use the App's native controls:
+当沙箱阻止分支/推送操作时（在外部管理的工作树中处于 detached HEAD），Agent 会提交所有工作，并告知用户使用 App 的原生控件：
 
-- **"Create branch"** — names the branch, then commit/push/PR via App UI
-- **"Hand off to local"** — transfers work to the user's local checkout
+- **“Create branch”** — 为分支命名，然后通过 App UI 提交/推送/创建 PR
+- **“Hand off to local”** — 将工作转移到用户的本地检出目录
 
-The agent can still run tests, stage files, and output suggested branch
-names, commit messages, and PR descriptions for the user to copy.
+Agent 仍然可以运行测试、暂存文件，并输出建议的分支名称、提交消息和 PR 描述，供用户复制。

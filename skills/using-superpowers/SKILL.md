@@ -54,6 +54,7 @@ description: 在开始任何对话时使用——规定如何查找和使用技�
 如果你的运行平台列在这里，请阅读其参考文件以了解特殊指令：
 
 - Codex：`references/codex-tools.md`
+- Gemini CLI：`references/gemini-tools.md`
 - Pi：`references/pi-tools.md`
 - Antigravity：`references/antigravity-tools.md`
 
