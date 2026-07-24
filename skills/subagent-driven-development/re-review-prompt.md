@@ -1,106 +1,97 @@
-# Scoped Re-Review Prompt Template
+# 限定范围复审子 Agent 提示模板
 
-Use this template when dispatching a re-review after a fix round. The
-re-reviewer verifies the findings were addressed and checks the fix diff for
-new breakage. It is not a fresh review — the full review already happened.
+在一轮修复后派发复审时使用此模板。复审者要验证发现项是否已经解决，
+并检查修复 diff 是否引入新的破坏。这不是一次全新审查——完整审查已经完成。
 
-**Purpose:** Verify each finding from the previous review was addressed, and
-that the fix itself broke nothing.
+**目的：** 验证上一次审查的每个发现项都已解决，并确认修复本身没有破坏任何内容。
 
 ```
-Subagent (general-purpose):
-  description: "Re-review Task N fix round R"
-  model: [MODEL — REQUIRED: choose per SKILL.md Model Selection; an omitted
-         model silently inherits the session's most expensive one]
+子 Agent（通用）：
+  description: "复审任务 N 的第 R 轮修复"
+  model: [MODEL — 必填：根据 SKILL.md 的模型选择规则选定；省略 model
+          会悄悄继承当前会话中成本最高的模型]
   prompt: |
-    You are re-reviewing one task's fix round. A previous review produced
-    findings; an implementer has attempted to fix them. Your job is to
-    verdict each finding and inspect the fix diff — nothing else.
+    你正在复审一个任务的一轮修复。先前的审查产生了一组发现项；实现者已经尝试
+    修复它们。你的工作是裁定每个发现项，并检查修复 diff——仅此而已。
 
-    ## The Task
+    ## 任务
 
-    Read the task brief: [BRIEF_FILE]
+    阅读任务简报：[BRIEF_FILE]
 
-    ## The Findings Under Verification
+    ## 待验证的发现项
 
     [FINDINGS]
 
-    ## The Fix
+    ## 修复
 
-    Read the implementer's report (fix reports are appended at the end):
+    阅读实现者的报告（修复报告追加在末尾）：
     [REPORT_FILE]
 
-    **Fix base:** [FIX_BASE_SHA] (the head the previous review saw)
+    **Fix base:** [FIX_BASE_SHA]（上次审查看到的 head）
     **Head:** [HEAD_SHA]
-    **Diff file:** [DIFF_FILE]
+    **Diff 文件：** [DIFF_FILE]
 
-    Read the diff file once — it contains the fix commits, a stat summary,
-    and the fix diff with surrounding context. Do not re-run git commands.
-    If the diff file is missing, fetch the diff yourself:
-    `git diff --stat [FIX_BASE_SHA]..[HEAD_SHA]` and
-    `git diff [FIX_BASE_SHA]..[HEAD_SHA]`.
+    只读取一次 diff 文件——它包含修复提交、统计摘要，以及带周边上下文的修复 diff。
+    不要重新运行 git 命令。如果 diff 文件缺失，请自行获取 diff：
+    `git diff --stat [FIX_BASE_SHA]..[HEAD_SHA]` 和
+    `git diff [FIX_BASE_SHA]..[HEAD_SHA]`。
 
-    Your review is read-only on this checkout. Do not mutate the working
-    tree, the index, HEAD, or branch state in any way.
+    在此检出目录中，你的审查是只读的。不得以任何方式修改工作树、索引、HEAD
+    或分支状态。
 
-    ## Scope
+    ## 范围
 
-    Your scope is the findings list and the fix diff. Verdict every finding.
-    Inspect the fix diff for new problems the fix itself introduced. Do NOT
-    re-review code the fix did not touch: if you notice an issue entirely
-    outside the fix diff, report it under Out-of-Scope Observations — it
-    does not block this task and does not extend the loop. A broad
-    whole-branch review happens after all tasks are complete.
+    你的范围是发现项列表和修复 diff。必须裁定每一个发现项。检查修复 diff，
+    看修复本身是否引入了新问题。不要重新审查修复没有触及的代码：如果你注意到
+    一个完全位于修复 diff 之外的问题，请将其报告在“范围外观察项”下——它不会
+    阻塞此任务，也不会延长循环。所有任务完成后会进行一次广泛的整分支审查。
 
-    ## Tests
+    ## 测试
 
-    The implementer re-ran the tests covering the amended code and appended
-    the results to the report file. Treat the report as unverified claims:
-    confirm the fix report names the covering tests and shows their output,
-    and verify the claims against the diff. Do not re-run the suite to
-    confirm their report. Run a test only when reading the code raises a
-    specific doubt that no existing run answers — and then a focused test,
-    never a package-wide suite.
+    实现者已经重新运行覆盖已修改代码的测试，并把结果追加到了报告文件中。
+    把报告视为未经验证的声明：确认修复报告写明了覆盖测试并展示其输出，
+    再根据 diff 验证这些声明。不要为了确认报告而重新运行测试套件。只有在阅读
+    代码时产生了现有运行结果无法解答的具体疑问，才运行测试——而且只能运行
+    聚焦测试，绝不运行包级完整套件。
 
-    ## Output Format
+    ## 输出格式
 
-    Your final message is the report itself: begin directly with the first
-    finding's verdict. Every line is a verdict, a finding with file:line,
-    or a check you ran — no preamble, no process narration.
+    你的最终消息就是报告本身：直接从第一个发现项的裁定开始。每一行都必须是
+    裁定、带 file:line 的发现项，或你运行过的检查——不要写前言、过程叙述或
+    结尾总结。
 
-    ### Finding Verdicts
+    ### 发现项裁定
 
-    For each finding in The Findings Under Verification, in order:
-    - **[finding one-liner]** — ADDRESSED | NOT ADDRESSED, with file:line
-      evidence. "Attempted" is not addressed: the specific defect must no
-      longer exist.
+    按“待验证的发现项”中的顺序，逐项报告：
+    - **[发现项单行摘要]** — ADDRESSED | NOT ADDRESSED，并附 file:line 证据。
+      “尝试过”不等于已解决：具体缺陷必须已经不存在。
 
-    ### New Breakage in the Fix Diff
+    ### 修复 Diff 中的新破坏
 
-    Anything the fix itself broke or introduced, with severity
-    (Critical/Important/Minor) and file:line. "None" if clean.
+    修复本身破坏或引入的任何内容，附严重级别（Critical/Important/Minor）
+    和 file:line。如果干净，则写“无”。
 
-    ### Out-of-Scope Observations
+    ### 范围外观察项
 
-    Issues you noticed entirely outside the fix diff. Non-blocking; the
-    controller ledgers these for the final review. "None" if none.
+    你注意到的、完全位于修复 diff 之外的问题。它们不阻塞任务；控制器会将其
+    记入账本，供最终审查处理。如果没有，则写“无”。
 
-    ### Verdict
+    ### 裁定
 
-    **Fix round:** [All findings addressed, no new Critical/Important
-    breakage | Findings remain open] — list the open ones.
+    **修复轮次：** [所有发现项均已解决，且没有新的 Critical/Important 破坏 |
+    仍有发现项未解决]——列出尚未解决的项目。
 ```
 
-**Placeholders:**
-- `[MODEL]` — REQUIRED: reviewer model per SKILL.md Model Selection; scoped
-  re-reviews of small fix diffs take a cheap-to-mid tier
-- `[BRIEF_FILE]` — the task brief file (same file the implementer worked from)
-- `[FINDINGS]` — the Critical/Important findings and spec gaps from the
-  previous review, copied verbatim, one per bullet
-- `[REPORT_FILE]` — the implementer's report file (fix reports appended)
-- `[FIX_BASE_SHA]` — the head the previous review saw
-- `[HEAD_SHA]` — current commit
-- `[DIFF_FILE]` — the path `scripts/review-package PLAN_FILE FIX_BASE HEAD` printed
+**占位符：**
+- `[MODEL]` — 必填：根据 SKILL.md 的模型选择规则选择审查模型；对于小型
+  修复 diff 的限定范围复审，使用低成本至中等档位模型
+- `[BRIEF_FILE]` — 任务简报文件（实现者使用的同一文件）
+- `[FINDINGS]` — 上一次审查中的 Critical/Important 发现项和规格缺口，
+  逐字复制，每项一个项目符号
+- `[REPORT_FILE]` — 实现者的报告文件（修复报告追加在其中）
+- `[FIX_BASE_SHA]` — 上一次审查看到的 head
+- `[HEAD_SHA]` — 当前提交
+- `[DIFF_FILE]` — `scripts/review-package PLAN_FILE FIX_BASE HEAD` 打印出的路径
 
-**Re-reviewer returns:** per-finding verdicts (ADDRESSED / NOT ADDRESSED),
-new breakage in the fix diff, out-of-scope observations, and a round verdict.
+**复审者返回：** 每个发现项的裁定（ADDRESSED / NOT ADDRESSED）、修复 diff
+中的新破坏、范围外观察项，以及该轮裁定。
