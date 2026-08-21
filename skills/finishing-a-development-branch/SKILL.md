@@ -165,6 +165,26 @@ git worktree remove "$WORKTREE_PATH"
 git worktree prune  # Self-healing: clean up any stale registrations
 ```
 
+**如果移除被拒绝**（`contains modified or untracked files`）：工作树中有其他位置不存在的文件——未提交的计划、笔记或临时工作。绝不要自行使用 `--force`。向人类伙伴展示风险并询问：
+
+```bash
+git -C "$WORKTREE_PATH" status --porcelain -uall
+```
+
+```
+工作树移除被拒绝——这些文件从未提交：
+
+<文件列表>
+
+1. 在清理前将它们提交到 <branch>
+2. 将它们移动到 <main repo root>
+3. 删除它们（无法恢复）
+
+选择哪一项？
+```
+
+执行选择，然后再移除工作树。
+
 **否则：** 此工作区属于宿主环境——保留原位。如果你的平台提供 workspace-exit
 工具，请使用它。
 
@@ -187,6 +207,7 @@ git worktree prune  # Self-healing: clean up any stale registrations
 | “‘嗯，把它删掉吧’也算确认” | 只有精确输入 `discard` 才授权删除。 |
 | “PR 已经创建，所以工作树现在只是累赘” | PR 反馈需要在该工作树中修复。工作合入之前，它必须保留。 |
 | “另一个工作树看起来陈旧——我顺便清理” | 只清理 `.worktrees/` 或 `worktrees/` 下的工作树。其他一切都属于宿主环境。 |
+| “移除被拒绝——`--force` 只是完成清理” | 拒绝意味着文件只存在于该工作树。`--force` 会永久销毁它们。展示给人类伙伴并询问。 |
 | “合并结果失败可能只是偶发问题” | 合并结果一旦失败就停止一切。调查期间保留分支和工作树。 |
 | “基础分支显然是 main” | 确认分叉点或询问。合并到错误基础分支的撤销成本很高。 |
 | “推送被拒绝——强制推送就能解决” | 推送被拒绝说明远端已变化。先调查；只有你的人类伙伴明确要求时才强制推送。 |

@@ -1,0 +1,6 @@
+name: superpowers
+version: 6.3.0-zh.1
+description: Superpowers 技能与 Hermes Agent 工作流启动器
+author: AreChen
+provides_hooks:
+  - pre_llm_call

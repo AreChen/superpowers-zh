@@ -6,24 +6,40 @@ Superpowers 是一套面向编程 Agent 的完整软件开发方法论。它由�
 
 ## 版本对齐
 
-- **当前中文发行版：** `v6.2.0-zh.1`
-- **对齐的上游正式版：** [`obra/superpowers v6.2.0`](https://github.com/obra/superpowers/releases/tag/v6.2.0)
-- **上游基线提交：** [`3dcbd5c4b48e02263fbf4a3c01e3fe4f81d584d9`](https://github.com/obra/superpowers/commit/3dcbd5c4b48e02263fbf4a3c01e3fe4f81d584d9)
-- **对齐日期：** 2026-07-24
+- **当前中文发行版：** `v6.3.0-zh.1`
+- **对齐的上游正式版：** [`obra/superpowers v6.3.0`](https://github.com/obra/superpowers/releases/tag/v6.3.0)
+- **上游基线提交：** [`b36e082`](https://github.com/obra/superpowers/commit/b36e082)
+- **对齐日期：** 2026-08-21
 
-版本号中的 `zh.1` 表示：功能基线与上游 `v6.2.0` 对齐，这是该基线上的第 1 个中文发行版。后续同步新的上游版本时，会先更新前三段版本号，再从 `zh.1` 重新开始计数。
+版本号中的 `zh.1` 表示：功能基线与上游 `v6.3.0` 对齐，这是该基线上的第 1 个中文发行版。后续同步新的上游版本时，会先更新前三段版本号，再从 `zh.1` 重新开始计数。
 
-## 上游正在招聘
+## 目录
 
-Superpowers 上游团队正在招聘一名全职工程师，协助社区运营与代码开发。
-
-职位详情：https://primeradiant.com/jobs/superpowers-community-engineer/
-
-如果你认识合适的人选，欢迎推荐给上游团队。
-
-## 快速开始
-
-为你的编程 Agent 安装 Superpowers 中文版：[Claude Code](#claude-code)、[Antigravity](#antigravity)、[Codex App](#codex-app)、[Codex CLI](#codex-cli)、[Cursor](#cursor)、[Factory Droid](#factory-droid)、[Gemini CLI](#gemini-cli)、[GitHub Copilot CLI](#github-copilot-cli)、[Kimi Code](#kimi-code)、[OpenCode](#opencode)、[Pi](#pi)。
+- [工作原理](#工作原理)
+- [商业服务](#商业服务)
+- [安装](#安装)
+  - [Claude Code](#claude-code)
+  - [Antigravity](#antigravity)
+  - [Codex App](#codex-app)
+  - [Codex CLI](#codex-cli)
+  - [Cursor](#cursor)
+  - [Devin CLI](#devin-cli)
+  - [Factory Droid](#factory-droid)
+  - [Gemini CLI](#gemini-cli)
+  - [GitHub Copilot CLI](#github-copilot-cli)
+  - [Grok Build CLI](#grok-build-cli)
+  - [Kimi Code](#kimi-code)
+  - [OpenCode](#opencode)
+  - [Pi](#pi)
+  - [Hermes Agent](#hermes-agent)
+- [基本工作流](#基本工作流)
+- [社区](#社区)
+- [包含内容](#包含内容)
+- [核心理念](#核心理念)
+- [参与贡献](#参与贡献)
+- [更新](#更新)
+- [许可证](#许可证)
+- [Visual Companion 遥测](#visual-companion-遥测)
 
 ## 工作原理
 
@@ -128,6 +144,20 @@ codex plugin marketplace upgrade superpowers-dev
 
 也可以在插件市场中搜索 `superpowers`。请确认安装详情显示的是 `Superpowers 中文版`；如果只看到上游英文版，可改用本仓库的本地插件方式。
 
+### Devin CLI
+
+从本中文仓库安装插件：
+
+```bash
+devin plugins install AreChen/superpowers-zh
+```
+
+更新到最新版本：
+
+```bash
+devin plugins update superpowers
+```
+
 ### Factory Droid
 
 注册本中文仓库的插件市场：
@@ -168,6 +198,20 @@ copilot plugin marketplace add AreChen/superpowers-zh
 
 ```bash
 copilot plugin install superpowers@superpowers-dev
+```
+
+### Grok Build CLI
+
+Superpowers 可通过 [Grok 官方插件市场](https://github.com/xai-org/plugin-marketplace)安装。当前官方市场对应上游插件：
+
+```bash
+grok plugin install superpowers@xai-official --trust
+```
+
+也可以在 TUI 中打开市场，搜索 Superpowers 并安装：
+
+```text
+/marketplace
 ```
 
 ### Kimi Code
@@ -228,6 +272,16 @@ pi -e /path/to/superpowers-zh
 
 Pi 软件包会加载 Superpowers 技能，并通过一个小型扩展在会话启动和上下文压缩后注入 `using-superpowers` 引导。Pi 原生支持技能，因此不需要兼容性的 `Skill` 工具。子 Agent 和任务列表工具仍可作为可选的 Pi 配套软件包使用。
 
+### Hermes Agent
+
+从本中文仓库安装 Hermes 插件：
+
+```bash
+hermes plugins install AreChen/superpowers-zh --enable
+```
+
+安装后重启正在运行的 Hermes 会话。注意：Hermes 没有上下文压缩后的钩子；如果超长会话在第一轮之后发生压缩并导致技能停止触发，请启动新会话。
+
 ## 基本工作流
 
 1. **brainstorming** —— 在编写代码前触发。通过提问澄清初步想法、探索替代方案，分段展示设计供用户确认，并保存设计文档。
@@ -245,6 +299,14 @@ Pi 软件包会加载 Superpowers 技能，并通过一个小型扩展在会话�
 7. **finishing-a-development-branch** —— 全部任务完成后触发。验证测试并提供合并、创建 PR、保留或丢弃分支等选项，最后清理 worktree。
 
 **Agent 会在执行任何任务前检查是否存在相关技能。** 这些是必须遵循的工作流，而不是可选建议。
+
+## 社区
+
+Superpowers 由 [Jesse Vincent](https://blog.fsck.com) 和 [Prime Radiant](https://primeradiant.com) 团队创建。本中文分叉由 [AreChen](https://github.com/AreChen) 维护。
+
+- **Discord**：[加入上游社区](https://discord.gg/35wsABTejz)，获取支持、提出问题并分享你使用 Superpowers 构建的项目。
+- **问题反馈**：https://github.com/AreChen/superpowers-zh/issues
+- **上游版本公告**：[订阅通知](https://primeradiant.com/superpowers/)
 
 ## 包含内容
 
@@ -314,11 +376,3 @@ Superpowers 的更新方式取决于你使用的编程 Agent。通过 Git 市场
 该请求不包含你的项目、提示词或编程 Agent 的详细信息，也不会记录点击行为或你正在构建的内容。它只用于粗略了解使用人数和版本分布，并且完全可选。
 
 如需关闭，请把环境变量 `SUPERPOWERS_DISABLE_TELEMETRY` 设置为任意真值。Superpowers 也会遵循 Claude Code 的 `DISABLE_TELEMETRY` 和 `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC` 退出设置。
-
-## 社区
-
-Superpowers 由 [Jesse Vincent](https://blog.fsck.com) 和 [Prime Radiant](https://primeradiant.com) 团队创建。本中文分叉由 [AreChen](https://github.com/AreChen) 维护。
-
-- **Discord**：[加入上游社区](https://discord.gg/35wsABTejz)，获取支持、提出问题并分享你使用 Superpowers 构建的项目。
-- **问题反馈**：https://github.com/AreChen/superpowers-zh/issues
-- **上游版本公告**：[订阅通知](https://primeradiant.com/superpowers/)

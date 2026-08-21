@@ -1,0 +1,22 @@
+{
+  "name": "superpowers",
+  "version": "6.3.0-zh.1",
+  "description": "面向 Agent 的技能框架与软件开发方法：规划、TDD、调试和协作工作流。",
+  "author": {
+    "name": "AreChen",
+    "email": ""
+  },
+  "homepage": "https://github.com/AreChen/superpowers-zh",
+  "repository": "https://github.com/AreChen/superpowers-zh",
+  "license": "MIT",
+  "keywords": [
+    "brainstorming",
+    "subagent-driven-development",
+    "skills",
+    "planning",
+    "tdd",
+    "debugging",
+    "code-review",
+    "workflow"
+  ]
+}

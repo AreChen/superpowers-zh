@@ -57,6 +57,7 @@ description: 在开始任何对话时使用——规定如何查找和使用技�
 - Gemini CLI：`references/gemini-tools.md`
 - Pi：`references/pi-tools.md`
 - Antigravity：`references/antigravity-tools.md`
+- Hermes Agent：`references/hermes-tools.md`
 
 ## 用户指令
 

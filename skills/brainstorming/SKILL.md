@@ -7,20 +7,57 @@ description: "在进行任何创造性工作之前，你都必须使用此技能
 
 通过自然的协作式对话，帮助将想法转化为完整成形的设计和规格说明。
 
-首先了解当前项目的上下文，然后一次提出一个问题来完善想法。一旦你理解了要构建的内容，就展示设计并获得用户批准。
+先判断请求需要多少流程，再沿着对应路径推进：了解上下文、完善想法、展示设计，并获得人类伙伴的批准。
 
 <HARD-GATE>
-在你展示设计并获得用户批准之前，不得调用任何实现技能、编写任何代码、搭建任何项目脚手架或采取任何实现行动。无论项目看起来多么简单，这都适用于每一个项目。
+在你告知人类伙伴打算做什么并获得批准之前，不得调用任何实现技能、编写任何代码、搭建任何项目脚手架或采取任何实现行动。以下每条路径上的每项任务都适用——流程仪式会随任务调整，但批准关卡永远不会取消。
 </HARD-GATE>
 
-## 反模式：“这太简单了，不需要设计”
+## 三条路径
 
-每个项目都要经过这一流程。待办事项列表、单函数实用工具、配置变更——无一例外。“简单”项目最容易因未经审视的假设而造成最多的工作浪费。设计可以很简短（对于真正简单的项目，只需几句话），但你必须展示设计并获得批准。
+在提出第一个问题之前先分类，并大声说出分类——例如“这看起来是有边界的任务，所以我会在这里展示一个简短设计，而不是写规格说明”——让人类伙伴可以推翻你的判断：
+
+- **探索（Spike）**——可行性问题（“能不能……”“是否可能……”“快速粗糙地做也可以”），产出是答案而不是要保留的代码。用 2-3 句话说明问题和尝试方式，得到同意后，以正确性允许的最低成本进行探查。不写设计文档或规格文件。把发现报告为建议；构建的任何内容都必须标记为一次性产物。
+- **有边界（Bounded）**——对本仓库已有代码的范围明确的改动：新标志、小端点、单文件修复。仅仅理解应用类型还不够——有边界意味着要修改的流程已经存在且可供阅读。如果没有可修改的现有流程，任务就不是有边界的。提出关键澄清问题，在对话中展示简短设计（几句话到几段短文），然后停止。只有人类伙伴明确同意设计后才能实现；不写规格文件或实现计划文档。
+- **架构性（Architectural）**——新项目、新子系统、改变组件关系或其他人依赖的接口。走完整流程：提问、方案、分节设计、书面规格说明，然后调用 writing-plans 技能。
+
+如果在两条路径之间犹豫，选择较重的路径。这个棘轮只能向上：任务中途发现隐藏复杂性时，停止、说明情况并升级路径；不会中途降级。
+
+## 反模式：“太简单了，不需要批准”
+
+每条路径都必须在人类伙伴批准意图后才能实现。待办事项列表、单函数工具、配置变更——设计可以只是聊天中的两句话，但仍必须展示并获得批准。“简单”任务最容易因未经审视的假设而浪费工作。随简单程度调整的是产物，不是批准。
+
+## 危险信号
+
+| 想法 | 事实 |
+|---------|---------|
+| “这太简单了，不需要设计” | 简单意味着设计简短，而不是没有设计。聊天中写两句话，然后获得批准。 |
+| “我把它叫作有边界，就可以跳过规格” | 为了省事而贴标签本身就是疑点——选择更重的路径。 |
+| “它有边界而且设计显而易见——他们阅读时我先开始” | 关卡是批准，不是设计长短。展示后停止，直到听到同意。 |
+| “我了解这种应用，所以它有边界” | 有边界衡量的是仓库，而不是你的熟悉程度。新项目没有现有流程，属于架构性任务。 |
+| “探索成功了，我就保留代码” | 探索的产出是答案。保留代码是新请求，需要重新分类。 |
+| “它变复杂了，但我快做完了——不用重新分类” | 隐藏复杂性会在任务中途升级路径。停止并说明情况。 |
+| “他们批准了探索，所以后续改动也获批了” | 每个任务都有自己的分类和自己的批准。 |
 
 ## 清单
 
-你必须为以下每一项创建一项任务，并按顺序完成它们：
+先分类并宣布路径，然后为对应路径上的每一项创建任务并按顺序完成。
 
+**探索路径：**
+1. **探索项目上下文**——获取足以界定探查范围的信息
+2. **展示问题和探查计划**——2-3 句话
+3. **获得批准**——得到同意即可
+4. **进行调查**——以正确性允许的最低成本推进
+5. **报告发现**——给出建议，并标记所有构建内容为一次性产物
+
+**有边界路径：**
+1. **探索项目上下文**——检查文件、文档和最近提交
+2. **提出澄清问题**——一次一个，只问关键问题
+3. **在聊天中展示简短设计**——方案、涉及文件和测试
+4. **获得批准**——停止并等待明确的“是”；展示设计后立即开始就是跳过关卡
+5. **实现**——使用正常开发流程推进（TDD 仍适用）；不写计划文档
+
+**架构性路径：**
 1. **探索项目上下文**——检查文件、文档和最近的提交
 2. **在恰当时机提供视觉伴侣**——不要预先提供。当某个问题第一次确实用展示比用描述更清楚时，就在那时提出使用它（用一条单独的消息）；获得批准后，它的浏览器标签页会为你打开。如果始终没有出现视觉问题，就绝不要提出使用它。参见下方的“视觉伴侣”一节。
 3. **提出澄清问题**——一次一个，了解目的、约束和成功标准
@@ -28,13 +65,20 @@ description: "在进行任何创造性工作之前，你都必须使用此技能
 5. **展示设计**——按复杂度划分并调整各节内容，每展示一节后都要获得用户批准
 6. **编写设计文档**——保存到 `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md` 并提交
 7. **规格说明自审**——快速进行内联检查，查找占位符、矛盾、歧义和范围问题（见下文）
-8. **用户审查已写好的规格说明** — 请用户在继续之前审查规格说明文件
-9. **过渡到实现** — 调用 writing-plans 技能来创建实现计划
+8. **用户审查已写好的规格说明**——请用户在继续之前审查规格说明文件
+9. **过渡到实现**——调用 writing-plans 技能来创建实现计划
 
 ## 流程
 
 ```dot
 digraph brainstorming {
+    "Classify: spike / bounded / architectural" [shape=diamond, label="分类：探索 / 有边界 / 架构性"];
+    "Present question + probe (2-3 sentences)" [shape=box, label="展示问题和探查（2-3 句话）"];
+    "Ask clarifying questions (bounded)" [shape=box, label="提出澄清问题（有边界）"];
+    "Present short design in chat" [shape=box, label="在聊天中展示简短设计"];
+    "Human approves?" [shape=diamond, label="人类批准了吗？"];
+    "Investigate; report recommendation" [shape=doublecircle, label="调查并报告建议"];
+    "Implement via normal workflow (no plan doc)" [shape=doublecircle, label="通过正常流程实现（无计划文档）"];
     "Explore project context" [shape=box, label="探索项目上下文"];
     "Ask clarifying questions" [shape=box, label="提出澄清问题"];
     "Propose 2-3 approaches" [shape=box, label="提出 2-3 种方案"];
@@ -44,7 +88,17 @@ digraph brainstorming {
     "Spec self-review\n(fix inline)" [shape=box, label="规格说明自审\n（内联修正）"];
     "User reviews spec?" [shape=diamond, label="用户审查规格说明了吗？"];
     "Invoke writing-plans skill" [shape=doublecircle, label="调用 writing-plans 技能"];
+    "Hidden complexity? Upgrade path" [shape=box, label="发现隐藏复杂性？升级路径"];
 
+    "Classify: spike / bounded / architectural" -> "Present question + probe (2-3 sentences)" [label="探索"];
+    "Classify: spike / bounded / architectural" -> "Ask clarifying questions (bounded)" [label="有边界"];
+    "Classify: spike / bounded / architectural" -> "Explore project context" [label="架构性"];
+    "Present question + probe (2-3 sentences)" -> "Human approves?";
+    "Ask clarifying questions (bounded)" -> "Present short design in chat";
+    "Present short design in chat" -> "Human approves?";
+    "Human approves?" -> "Investigate; report recommendation" [label="探索：是"];
+    "Human approves?" -> "Implement via normal workflow (no plan doc)" [label="有边界：是"];
+    "Hidden complexity? Upgrade path" -> "Classify: spike / bounded / architectural";
     "Explore project context" -> "Ask clarifying questions";
     "Ask clarifying questions" -> "Propose 2-3 approaches";
     "Propose 2-3 approaches" -> "Present design sections";
@@ -57,9 +111,11 @@ digraph brainstorming {
     "User reviews spec?" -> "Invoke writing-plans skill" [label="已批准"];
 }
 ```
-**终止状态是调用 writing-plans。** 绝不要调用 frontend-design、mcp-builder 或任何其他实现技能。在 brainstorming 之后，你调用的唯一技能是 writing-plans。
+**终止状态取决于路径。** 架构性路径：brainstorming 之后唯一调用的技能是 writing-plans，绝不要调用 frontend-design、mcp-builder 或其他实现技能。有边界路径：获批后直接使用正常开发流程实现，不写计划文档。探索路径：终止状态是报告建议。
 
 ## 流程
+
+下面的子节服务于有边界和架构性路径（探索路径在“展示探查、获得同意”处停止）。从**探索方案**开始的内容属于架构性深度；对有边界任务来说，上下文、几个问题和一份聊天中的简短设计就是完整流程。
 
 **理解想法：**
 
@@ -98,7 +154,7 @@ digraph brainstorming {
 - 如果现有代码存在影响这项工作的问题（例如，文件变得过大、边界不清晰、职责纠缠），应将有针对性的改进纳入设计——就像优秀的开发者会改进自己正在处理的代码一样。
 - 不要提出无关的重构。始终专注于服务当前目标的内容。
 
-## 设计之后
+## 设计之后（架构性路径）
 
 **文档：**
 
