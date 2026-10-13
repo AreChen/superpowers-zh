@@ -26,25 +26,26 @@ description: 在当前会话中执行包含独立任务的实现计划时使用
 digraph when_to_use {
     "有实现计划吗？" [shape=diamond];
     "任务大多相互独立吗？" [shape=diamond];
-    "留在当前会话中吗？" [shape=diamond];
+    "伙伴选择内联执行，或没有子 Agent 工具？" [shape=diamond];
     "subagent-driven-development" [shape=box];
     "executing-plans" [shape=box];
     "先手动执行或进行头脑风暴" [shape=box];
 
     "有实现计划吗？" -> "任务大多相互独立吗？" [label="是"];
     "有实现计划吗？" -> "先手动执行或进行头脑风暴" [label="否"];
-    "任务大多相互独立吗？" -> "留在当前会话中吗？" [label="是"];
+    "任务大多相互独立吗？" -> "伙伴选择内联执行，或没有子 Agent 工具？" [label="是"];
     "任务大多相互独立吗？" -> "先手动执行或进行头脑风暴" [label="否 - 紧密耦合"];
-    "留在当前会话中吗？" -> "subagent-driven-development" [label="是"];
-    "留在当前会话中吗？" -> "executing-plans" [label="否 - 并行会话"];
+    "伙伴选择内联执行，或没有子 Agent 工具？" -> "executing-plans" [label="是"];
+    "伙伴选择内联执行，或没有子 Agent 工具？" -> "subagent-driven-development" [label="否"];
 }
 ```
 
-**与执行计划（并行会话）的对比：**
-- 同一会话（无需切换上下文）
-- 每项任务使用全新的子 Agent（无上下文污染）
-- 每项任务后都进行审查（规格符合性 + 代码质量），最后进行全面审查
-- 更快的迭代（任务之间无需人类介入）
+**与执行计划（内联执行）的对比：**
+
+- 每项任务使用全新的子 Agent（无上下文污染），而不是用同一个上下文完成所有任务
+- 每项任务后都进行审查（规格符合性 + 代码质量），而不是只在最后审查
+- 每项任务和每次审查都需要新的上下文；内联执行只需要一个上下文，加上一次最终审查
+- 两者都在当前会话中运行，共用同一个计划工作区和进度账本，且任务之间从不暂停
 
 ## 流程
 
@@ -122,8 +123,8 @@ superpowers:using-git-worktrees 创建一个工作区，或验证现有工作区
 最高的单一故障。请在台账文件中跟踪进度，而不要仅依赖待办事项。
 
 - 每个计划都拥有自己的工作区：技能启动时，运行本技能的
-  `scripts/sdd-workspace PLAN_FILE`——它会输出该计划被 git 忽略的
-  目录（`<repo-root>/.superpowers/sdd/<plan-basename>/`），本计划的
+  `bash scripts/sdd-workspace PLAN_FILE`——它会输出该计划被 git 忽略的
+  目录（位于 `<repo-root>/.superpowers/sdd/` 下），本计划的
   所有产物都存放于此：台账、简报、报告、复审包。
   绝不得读取或写入另一个计划的目录。
 - 检查此计划位于 `<workspace>/progress.md` 的台账。如果其第一行
@@ -191,7 +192,7 @@ superpowers:using-git-worktrees 创建一个工作区，或验证现有工作区
 派遣前记录 BASE（`git rev-parse HEAD`）——审查包和修复轮次的 diff 都需要它。
 
 - **任务简报：**派遣实现者之前，运行本技能的
-  `scripts/task-brief PLAN_FILE N`——它会将任务的完整文本提取到一个具有唯一名称的文件中，并打印该路径。组织派遣内容时，应让简报始终作为需求的唯一来源。你的派遣内容应包含：(1) 用一行说明此任务在项目中的位置；(2) 简报路径，并以“先阅读此文件——它就是你的需求，其中包含必须原样使用的精确值”引出；(3) 简报不可能知道的、来自先前任务的接口和决策；(4) 你对简报中所注意到的任何歧义的解决方案；(5) 报告文件路径和报告约定。精确值（数字、魔法字符串、签名、测试用例）只能出现在简报中。绝不要让子 Agent 阅读整个计划文件。
+  `bash scripts/task-brief PLAN_FILE N`——它会将任务的完整文本提取到一个具有唯一名称的文件中，并打印该路径。组织派遣内容时，应让简报始终作为需求的唯一来源。你的派遣内容应包含：(1) 用一行说明此任务在项目中的位置；(2) 简报路径，并以“先阅读此文件——它就是你的需求，其中包含必须原样使用的精确值”引出；(3) 简报不可能知道的、来自先前任务的接口和决策；(4) 你对简报中所注意到的任何歧义的解决方案；(5) 报告文件路径和报告约定。精确值（数字、魔法字符串、签名、测试用例）只能出现在简报中。绝不要让子 Agent 阅读整个计划文件。
 - **报告文件：**以简报为实现者的报告文件命名（简报 `…/task-N-brief.md` → 报告 `…/task-N-report.md`），并将其写入派遣提示。实现者在该文件中写入完整报告，并且只返回状态、提交记录、一行测试摘要和关注事项。
 - 一条派遣提示描述的是一个任务，而不是会话的历史。不要把累积的先前任务摘要（“任务 1-3 后的状态”）粘贴到后续派遣中——某个真实会话的派遣内容达到了 42k 个字符，其中 99% 都是粘贴的历史记录。一个全新的子 Agent 需要的是它的任务、它会涉及的接口以及全局约束。除此之外什么都不需要。
 - 派遣内容携带“不派遣子 Agent”的契约（该契约位于实现者模板中）：实现者绝不派遣子 Agent——既不派助手，也绝不派审查者。审查会在它报告后由你负责派遣。真实会话中，实现者自行派出的每个审查者都重复了控制器已经派出的任务审查，等于每项任务多花一张完整审查席位。
@@ -205,7 +206,7 @@ superpowers:using-git-worktrees 创建一个工作区，或验证现有工作区
 
 实现者子 Agent 会报告以下四种状态之一。请分别妥善处理：
 
-**DONE:** 生成审查包（`scripts/review-package PLAN_FILE BASE HEAD`，从本技能的目录运行——它会输出其写入的唯一文件路径；BASE 是你在派遣实现者之前记录的提交——绝不能使用 `HEAD~1`，因为这会悄无声息地丢弃多提交任务中除最后一个提交之外的所有提交），然后使用输出的路径派遣任务审查者。
+**DONE:** 生成审查包（`bash scripts/review-package PLAN_FILE BASE HEAD`，从本技能的目录运行——它会输出其写入的唯一文件路径；BASE 是你在派遣实现者之前记录的提交——绝不能使用 `HEAD~1`，因为这会悄无声息地丢弃多提交任务中除最后一个提交之外的所有提交），然后使用输出的路径派遣任务审查者。
 
 **DONE_WITH_CONCERNS:** 实现者完成了工作，但提出了一些疑虑。继续之前先阅读这些疑虑。如果疑虑涉及正确性或范围，请在审查之前解决。如果只是一些观察（例如，“这个文件变得越来越大了”），请记录下来并继续审查。
 
@@ -228,7 +229,7 @@ superpowers:using-git-worktrees 创建一个工作区，或验证现有工作区
 逐任务审查是限定于任务范围的关卡。广泛审查只进行一次，即在最终的整个分支审查时进行。绝不要跳过任务审查，也绝不要接受缺少任一结论的报告——规范符合性和任务质量两者都必须具备。实现者自我审查绝不能取代任务审查；两者都必不可少。
 
 - 将 diff 作为文件交给审查者：运行本技能的
-  `scripts/review-package PLAN_FILE BASE HEAD`，并将它输出的文件路径传给审查者
+  `bash scripts/review-package PLAN_FILE BASE HEAD`，并将它输出的文件路径传给审查者
   （或者，不使用 bash 时：针对该范围运行 `git log --oneline`、`git diff --stat`
   和 `git diff -U10`，并将输出重定向到一个名称唯一的
   文件）。该输出绝不会进入你自己的上下文，而审查者只需一次 Read
@@ -282,7 +283,7 @@ superpowers:using-git-worktrees 创建一个工作区，或验证现有工作区
 
 **每一轮，无论是哪种情况：** 实现者进行修复，重新运行覆盖已修改代码的测试，将其修复报告追加到同一个报告文件中，并返回简短契约。在重新派发审查者之前，确认修复报告包含覆盖已修改代码的测试、所运行的命令和输出；三者全部具备后，再派发复审。在修复消息中列出覆盖测试文件的名称——单行修复不需要整个测试套件。
 
-**复审是作用域化的。** 运行 `scripts/review-package PLAN_FILE FIX_BASE HEAD`，其中 FIX_BASE 是上一次审查所看到的提交头，并派发 [re-review-prompt.md](re-review-prompt.md)，同时提供发现项列表、简报、报告文件和打印出的 diff 路径。复审者将每个发现项裁定为 ADDRESSED 或 NOT ADDRESSED，并且只标记修复 diff 中的新破坏。修复 diff 中新的 Critical/Important 破坏会加入未解决的发现项列表。超出作用域的观察项会作为延期次要项记入账本——它们绝不会延长循环。
+**复审是作用域化的。** 运行 `bash scripts/review-package PLAN_FILE FIX_BASE HEAD`，其中 FIX_BASE 是上一次审查所看到的提交头，并派发 [re-review-prompt.md](re-review-prompt.md)，同时提供发现项列表、简报、报告文件和打印出的 diff 路径。复审者将每个发现项裁定为 ADDRESSED 或 NOT ADDRESSED，并且只标记修复 diff 中的新破坏。修复 diff 中新的 Critical/Important 破坏会加入未解决的发现项列表。超出作用域的观察项会作为延期次要项记入账本——它们绝不会延长循环。
 
 **每轮结束后，**向账本追加：
 `Task <N>: fix round <R>/5 (<X> addressed, <Y> open — <finding one-liners>; commits <a7>..<b7>)`
@@ -309,9 +310,9 @@ superpowers:using-git-worktrees 创建一个工作区，或验证现有工作区
 
 ## 最终审查
 
-最终的整分支审查也要有一个审查包：运行 `scripts/review-package PLAN_FILE MERGE_BASE HEAD`（MERGE_BASE = 该分支起始于的提交，例如 `git merge-base main HEAD`），并在派发最终审查时包含输出的路径，这样最终审查者只需读取一个文件，而不必使用 git 命令重新推导分支差异。使用最强的可用模型进行派发（参见模型选择），并使用 superpowers:requesting-code-review 的 [code-reviewer.md](../requesting-code-review/code-reviewer.md)。让它查看账本中的 deferred-minor 行和 parked 行，以便对哪些项目必须在合并前修复进行分诊。
+最终的整分支审查也要有一个审查包：运行 `bash scripts/review-package PLAN_FILE MERGE_BASE HEAD`（MERGE_BASE = 该分支起始于的提交，例如 `git merge-base main HEAD`），并在派发最终审查时包含输出的路径，这样最终审查者只需读取一个文件，而不必使用 git 命令重新推导分支差异。使用最强的可用模型进行派发（参见模型选择），并使用 superpowers:requesting-code-review 的 [code-reviewer.md](../requesting-code-review/code-reviewer.md)。让它查看账本中的 deferred-minor 行和 parked 行，以便对哪些项目必须在合并前修复进行分诊。
 
-如果最终的整分支审查返回发现项，请派发一个且仅一个修复子 Agent，并向其提供完整的发现项列表——不要为每个发现项分别派一个修复者。按发现项分别安排的修复者都要重建上下文并重新运行套件；在一次真实会话中，最终审查的修复波次成本超过了其所有任务的总和。然后，对该修复波次恰好进行一次限定范围的复审（针对修复范围运行 `scripts/review-package PLAN_FILE FIX_BASE HEAD`，[re-review-prompt.md](re-review-prompt.md)）。按照任务循环中的熔断器方式裁决任何残留发现项：附裁定搁置，或裁决承重性发现项并记录你的决定。这里只能因上述四类情况停止。不存在第二个修复波次——当 finishing-a-development-branch 呈现选项时，残留的承重性发现项会提交给你的人类伙伴。
+如果最终的整分支审查返回发现项，请派发一个且仅一个修复子 Agent，并向其提供完整的发现项列表——不要为每个发现项分别派一个修复者。按发现项分别安排的修复者都要重建上下文并重新运行套件；在一次真实会话中，最终审查的修复波次成本超过了其所有任务的总和。然后，对该修复波次恰好进行一次限定范围的复审（针对修复范围运行 `bash scripts/review-package PLAN_FILE FIX_BASE HEAD`，[re-review-prompt.md](re-review-prompt.md)）。按照任务循环中的熔断器方式裁决任何残留发现项：附裁定搁置，或裁决承重性发现项并记录你的决定。这里只能因上述四类情况停止。不存在第二个修复波次——当 finishing-a-development-branch 呈现选项时，残留的承重性发现项会提交给你的人类伙伴。
 
 ## 收尾
 
@@ -342,7 +343,7 @@ superpowers:using-git-worktrees 创建一个工作区，或验证现有工作区
 
 [设置：已验证工作树]
 [一次性读取计划文件：docs/superpowers/plans/feature-plan.md]
-[解析工作区：scripts/sdd-workspace docs/superpowers/plans/feature-plan.md——其中没有账本，全新开始]
+[解析工作区：bash scripts/sdd-workspace docs/superpowers/plans/feature-plan.md——其中没有账本，全新开始]
 [为所有任务创建待办事项]
 
 任务 1：Hook 安装脚本

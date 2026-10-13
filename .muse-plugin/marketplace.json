@@ -1,0 +1,20 @@
+{
+  "name": "superpowers-dev",
+  "description": "Superpowers 中文核心技能库的开发市场",
+  "owner": {
+    "name": "Jesse Vincent",
+    "email": "jesse@fsck.com"
+  },
+  "plugins": [
+    {
+      "name": "superpowers",
+      "description": "适用于 Muse 的中文核心技能库：TDD、调试、协作模式与经过验证的工程实践",
+      "version": "7.0.0-zh.1",
+      "source": "./",
+      "author": {
+        "name": "Jesse Vincent",
+        "email": "jesse@fsck.com"
+      }
+    }
+  ]
+}

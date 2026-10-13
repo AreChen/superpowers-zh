@@ -53,11 +53,13 @@ description: 在开始任何对话时使用——规定如何查找和使用技�
 
 如果你的运行平台列在这里，请阅读其参考文件以了解特殊指令：
 
+- Claude Code：`references/claude-code-tools.md`
 - Codex：`references/codex-tools.md`
 - Gemini CLI：`references/gemini-tools.md`
 - Pi：`references/pi-tools.md`
 - Antigravity：`references/antigravity-tools.md`
 - Hermes Agent：`references/hermes-tools.md`
+- Muse：`references/muse-tools.md`
 
 ## 用户指令
 

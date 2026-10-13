@@ -147,7 +147,7 @@
 
 **占位符：**
 - `[MODEL]` — 必填：根据 SKILL.md 的模型选择规则选择审查模型
-- `[BRIEF_FILE]` — 必填：任务简报文件（`scripts/task-brief PLAN N`
+- `[BRIEF_FILE]` — 必填：任务简报文件（`bash scripts/task-brief PLAN N`
   会打印其路径；这也是实现者使用的同一文件）
 - `[GLOBAL_CONSTRAINTS]` — 从计划的“全局约束”部分或规格中逐字复制、
   且对此任务有约束力的要求：准确值、格式及组件间明示的关系
@@ -156,7 +156,7 @@
 - `[BASE_SHA]` — 此任务开始前的提交
 - `[HEAD_SHA]` — 当前提交
 - `[DIFF_FILE]` — 必填：控制器写入审查包的路径
-  （`scripts/review-package PLAN_FILE BASE HEAD` 会打印它写入的唯一
+  （`bash scripts/review-package PLAN_FILE BASE HEAD` 会打印它写入的唯一
   路径；该审查包永远不会进入控制器的上下文）
 
 **审查者返回：** 规格符合度裁定（✅/❌/⚠️）、优点、问题

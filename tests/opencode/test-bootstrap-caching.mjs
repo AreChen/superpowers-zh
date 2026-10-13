@@ -37,6 +37,10 @@ const mod = await import(pathToFileURL(pluginPath).href);
 const plugin = await mod.SuperpowersPlugin({ client: {}, directory: '.' });
 const transform = plugin['experimental.chat.messages.transform'];
 
+// Mapping constants are flavor-specific (#opencode-v2): V1 keeps the 1.18.x
+// tool names, V2 teaches the renamed tools. Assert both directly.
+const mappingFailures = assertMappingConstants(mod);
+
 const firstOutput = makeOutput(`${scenario} bootstrap first step`);
 await transform({}, firstOutput);
 const afterFirst = { existsCount, readCount };
@@ -44,6 +48,11 @@ const afterFirst = { existsCount, readCount };
 const secondOutput = makeOutput(`${scenario} bootstrap second step`);
 await transform({}, secondOutput);
 const afterSecond = { existsCount, readCount };
+
+// Exercise the V2 path (setup() + ctx.session.hook("context")) with a mock
+// ctx so the V2_MAPPING wiring is verified, not just the constant. Run after
+// the V1 count snapshots: setup() reads SKILL.md files during registration.
+const v2Result = await runV2ContextHook(mod);
 
 const result = {
   scenario,
@@ -58,11 +67,23 @@ const result = {
   secondReadCount: afterSecond.readCount,
   firstExistsCount: afterFirst.existsCount,
   secondExistsCount: afterSecond.existsCount,
+  v2BootstrapParts: v2Result.bootstrapParts,
+  mapsV2SubagentTool: v2Result.text.includes('`subagent`，并设置 `agent: "general"`'),
+  mapsV2SessionIDContinuation: v2Result.text.includes('`sessionID` 可继续已有子 Agent'),
+  mapsV2NoTodoTool: v2Result.text.includes('没有待办工具'),
+  mapsV2MutationToPatch: v2Result.text.includes('带 `patchText` 的 `patch`'),
+  mapsV2Shell: v2Result.text.includes('`shell`'),
+  staleV1ToolsInV2: v2Result.text.includes('`apply_patch`') || v2Result.text.includes('`todowrite`') || v2Result.text.includes('`subagent_type`'),
 };
 
 const failures = scenario === 'present' || scenario === 'present-crlf'
   ? assertPresentBootstrap(result)
   : assertMissingBootstrap(result);
+
+if (scenario === 'present') {
+  failures.push(...assertV2Bootstrap(result));
+}
+failures.push(...mappingFailures);
 
 if (failures.length > 0) {
   console.error(JSON.stringify(result, null, 2));
@@ -130,6 +151,107 @@ function assertPresentBootstrap(result) {
   }
   if (result.frontmatterLeaked) {
     failures.push('expected OpenCode bootstrap to strip SKILL.md frontmatter for LF and CRLF files');
+  }
+  return failures;
+}
+
+function assertMappingConstants(mod) {
+  const failures = [];
+  if (typeof mod.V1_MAPPING !== 'string' || typeof mod.V2_MAPPING !== 'string') {
+    failures.push('expected plugin to export V1_MAPPING and V2_MAPPING string constants');
+    return failures;
+  }
+  for (const needle of ['`todowrite`', '`task`，并设置 `subagent_type: "general"`', '`apply_patch`', '`bash`']) {
+    if (!mod.V1_MAPPING.includes(needle)) {
+      failures.push(`expected V1_MAPPING to keep the 1.18.x tool name ${needle}`);
+    }
+  }
+  for (const needle of [
+    '`subagent`，并设置 `agent: "general"`',
+    '`sessionID` 可继续已有子 Agent',
+    '没有待办工具',
+    '`write`',
+    '`edit`',
+    '带 `patchText` 的 `patch`',
+    '`shell`',
+    '`read`',
+    '`grep`, `glob`',
+    '`webfetch`',
+    '`websearch`',
+  ]) {
+    if (!mod.V2_MAPPING.includes(needle)) {
+      failures.push(`expected V2_MAPPING to teach the V2 tool ${needle}`);
+    }
+  }
+  for (const stale of ['`todowrite`', '`task`，并设置', '`apply_patch`', '`bash`']) {
+    if (mod.V2_MAPPING.includes(stale)) {
+      failures.push(`expected V2_MAPPING not to teach the V1-only tool name ${stale}`);
+    }
+  }
+  return failures;
+}
+
+// Drive setup() with a mock V2 ctx and fire the captured "context" hook on a
+// top-level (parentID-less) session. Returns the injected-part count and the
+// injected bootstrap text ('' when nothing was injected).
+async function runV2ContextHook(mod) {
+  let contextHook = null;
+  const ctx = {
+    skill: {
+      transform: async (fn) => {
+        fn({ add: () => {} });
+      },
+    },
+    session: {
+      hook: async (name, cb) => {
+        if (name === 'context') contextHook = cb;
+      },
+      get: async ({ sessionID }) => ({ id: sessionID }), // top-level: no parentID
+    },
+  };
+  try {
+    await mod.default.setup(ctx);
+  } catch (err) {
+    console.error('[test] V2 setup() threw:', err);
+    return { bootstrapParts: 0, text: '' };
+  }
+  if (typeof contextHook !== 'function') {
+    return { bootstrapParts: 0, text: '' };
+  }
+  const event = {
+    sessionID: 'sess-v2-top',
+    messages: [{ role: 'user', content: [{ type: 'text', text: 'v2 bootstrap step' }] }],
+  };
+  await contextHook(event);
+  const parts = event.messages[0].content.filter(
+    (part) => part.type === 'text' && part.text.includes('EXTREMELY_IMPORTANT')
+  );
+  return { bootstrapParts: parts.length, text: parts[0]?.text || '' };
+}
+
+function assertV2Bootstrap(result) {
+  const failures = [];
+  if (result.v2BootstrapParts !== 1) {
+    failures.push(`expected V2 context hook to inject one bootstrap part, got ${result.v2BootstrapParts}`);
+    return failures;
+  }
+  if (!result.mapsV2SubagentTool) {
+    failures.push('expected V2 bootstrap to map general-purpose subagents to subagent with agent');
+  }
+  if (!result.mapsV2SessionIDContinuation) {
+    failures.push('expected V2 bootstrap to teach sessionID continuation for subagents');
+  }
+  if (!result.mapsV2NoTodoTool) {
+    failures.push('expected V2 bootstrap to state that V2 has no todo tool');
+  }
+  if (!result.mapsV2MutationToPatch) {
+    failures.push('expected V2 bootstrap to map file mutation to patch with patchText');
+  }
+  if (!result.mapsV2Shell) {
+    failures.push('expected V2 bootstrap to map shell commands to the shell tool');
+  }
+  if (result.staleV1ToolsInV2) {
+    failures.push('expected V2 bootstrap not to teach V1-only tool names (apply_patch/todowrite/subagent_type)');
   }
   return failures;
 }

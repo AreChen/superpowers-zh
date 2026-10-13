@@ -35,7 +35,7 @@
 ```bash
 # 请在用户批准使用伴侣之后再启动。--open 会在显示首个屏幕时自动打开用户的浏览器；
 # --project-dir 会持久保存模型稿，并支持使用同一端口重启。
-scripts/start-server.sh --project-dir /path/to/project --open
+bash scripts/start-server.sh --project-dir /path/to/project --open
 
 # 返回：{"type":"server-started","port":52341,
 #           "url":"http://localhost:52341/?key=ab12…",
@@ -56,7 +56,7 @@ scripts/start-server.sh --project-dir /path/to/project --open
 **Claude Code：**
 ```bash
 # 默认模式即可——脚本会自行将服务器置于后台运行。
-scripts/start-server.sh --project-dir /path/to/project --open
+bash scripts/start-server.sh --project-dir /path/to/project --open
 ```
 
 在 Windows 上，脚本会自动检测并切换到前台模式（这会阻塞工具调用）。在 Bash 工具调用中使用 `run_in_background: true`，使服务器能够跨对话轮次持续运行，然后在下一轮读取 `$STATE_DIR/server-info` 以获取 URL 和端口。
@@ -65,14 +65,14 @@ scripts/start-server.sh --project-dir /path/to/project --open
 ```bash
 # Codex 会清理后台进程。脚本会自动检测 CODEX_CI 并
 # 切换到前台模式。正常运行即可——无需额外标志。
-scripts/start-server.sh --project-dir /path/to/project --open
+bash scripts/start-server.sh --project-dir /path/to/project --open
 ```
 
 **Gemini CLI：**
 ```bash
 # 使用 --foreground，并在 shell 工具调用中设置 is_background: true，
 # 使进程能够跨轮次持续运行
-scripts/start-server.sh --project-dir /path/to/project --open --foreground
+bash scripts/start-server.sh --project-dir /path/to/project --open --foreground
 ```
 
 **Copilot CLI：**
@@ -88,7 +88,7 @@ bash scripts/start-server.sh --project-dir /path/to/project --open --foreground
 如果你的浏览器无法访问该 URL（这在远程/容器化环境中很常见），请绑定非环回主机：
 
 ```bash
-scripts/start-server.sh \
+bash scripts/start-server.sh \
   --project-dir /path/to/project \
   --host 0.0.0.0 \
   --url-host localhost
@@ -277,7 +277,7 @@ scripts/start-server.sh \
 ## 清理
 
 ```bash
-scripts/stop-server.sh $SESSION_DIR
+bash scripts/stop-server.sh $SESSION_DIR
 ```
 
 如果会话使用了 `--project-dir`，模型文件会保留在 `.superpowers/brainstorm/` 中，以供后续参考。只有 `/tmp` 中的会话会在停止时被删除。

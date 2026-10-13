@@ -95,7 +95,7 @@
 - `[REPORT_FILE]` — 实现者的报告文件（修复报告追加在其中）
 - `[FIX_BASE_SHA]` — 上一次审查看到的 head
 - `[HEAD_SHA]` — 当前提交
-- `[DIFF_FILE]` — `scripts/review-package PLAN_FILE FIX_BASE HEAD` 打印出的路径
+- `[DIFF_FILE]` — `bash scripts/review-package PLAN_FILE FIX_BASE HEAD` 打印出的路径
 
 **复审者返回：** 每个发现项的裁定（ADDRESSED / NOT ADDRESSED）、修复 diff
 中的新破坏、范围外观察项，以及该轮裁定。

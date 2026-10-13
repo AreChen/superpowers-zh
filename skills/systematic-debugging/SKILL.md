@@ -87,11 +87,11 @@ description: 在遇到任何缺陷、测试失败或意外行为时使用，且�
    ```bash
    # 第 1 层：工作流
    echo "=== 工作流中可用的机密信息：==="
-   echo "IDENTITY: ${IDENTITY:+SET}${IDENTITY:-UNSET}"
+   echo "IDENTITY: $([ -n "${IDENTITY:-}" ] && echo SET || echo UNSET)"
 
    # 第 2 层：构建脚本
    echo "=== 构建脚本中的环境变量：==="
-   env | grep IDENTITY || echo "环境中没有 IDENTITY"
+   printenv IDENTITY >/dev/null 2>&1 && echo "环境中有 IDENTITY" || echo "环境中没有 IDENTITY"
 
    # 第 3 层：签名脚本
    echo "=== 钥匙串状态：==="

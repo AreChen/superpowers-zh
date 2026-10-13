@@ -25,7 +25,7 @@ description: 在完成任务、实现重大功能或合并前使用，以验证�
 
 **1. 获取 git SHA：**
 ```bash
-BASE_SHA=$(git rev-parse HEAD~1)  # or origin/main
+BASE_SHA=$(git rev-parse HEAD~1)  # 或：git merge-base origin/main HEAD
 HEAD_SHA=$(git rev-parse HEAD)
 ```
 
@@ -52,7 +52,7 @@ HEAD_SHA=$(git rev-parse HEAD)
 
 你：继续之前，让我请求代码审查。
 
-BASE_SHA=$(git log --oneline | grep "Task 1" | head -1 | awk '{print $1}')
+BASE_SHA=$(git log --oneline | grep "Task 1" | head -1 | cut -d' ' -f1)
 HEAD_SHA=$(git rev-parse HEAD)
 
 [派遣代码审查子 Agent]

@@ -6,12 +6,12 @@ Superpowers 是一套面向编程 Agent 的完整软件开发方法论。它由�
 
 ## 版本对齐
 
-- **当前中文发行版：** `v6.3.0-zh.1`
-- **对齐的上游正式版：** [`obra/superpowers v6.3.0`](https://github.com/obra/superpowers/releases/tag/v6.3.0)
-- **上游基线提交：** [`b36e082`](https://github.com/obra/superpowers/commit/b36e082)
-- **对齐日期：** 2026-08-21
+- **当前中文发行版：** `v7.0.0-zh.1`
+- **对齐的上游正式版：** [`obra/superpowers v7.0.0`](https://github.com/obra/superpowers/releases/tag/v7.0.0)
+- **上游基线提交：** [`bb92a777`](https://github.com/obra/superpowers/commit/bb92a77741419a4ab5f06e711a283343f1ada0c3)
+- **对齐日期：** 2026-10-13
 
-版本号中的 `zh.1` 表示：功能基线与上游 `v6.3.0` 对齐，这是该基线上的第 1 个中文发行版。后续同步新的上游版本时，会先更新前三段版本号，再从 `zh.1` 重新开始计数。
+版本号中的 `zh.1` 表示：功能基线与上游 `v7.0.0` 对齐，这是该基线上的第 1 个中文发行版。后续同步新的上游版本时，会先更新前三段版本号，再从 `zh.1` 重新开始计数。
 
 ## 目录
 
@@ -31,8 +31,11 @@ Superpowers 是一套面向编程 Agent 的完整软件开发方法论。它由�
   - [Kimi Code](#kimi-code)
   - [OpenCode](#opencode)
   - [Pi](#pi)
+  - [Qwen Code](#qwen-code)
   - [Hermes Agent](#hermes-agent)
+  - [Muse](#muse)
 - [基本工作流](#基本工作流)
+- [出现问题时](#出现问题时)
 - [社区](#社区)
 - [包含内容](#包含内容)
 - [核心理念](#核心理念)
@@ -89,7 +92,7 @@ Agent 会通过对话逐步梳理出规格，并以便于阅读和确认的小�
 agy plugin install https://github.com/AreChen/superpowers-zh
 ```
 
-Antigravity 会运行插件的会话启动钩子，因此 Superpowers 会从第一条消息起生效。更新时重新执行同一条命令即可。
+Antigravity 会列出每个已安装技能的描述，`using-superpowers` 的描述会提示模型在对话开始时加载该技能。更新时重新执行同一条安装命令即可。
 
 ### Codex App
 
@@ -236,11 +239,21 @@ grok plugin install superpowers@xai-official --trust
 
 OpenCode 使用自己的插件安装机制。即使你已经在其他编程 Agent 中安装了 Superpowers，仍需为 OpenCode 单独安装。
 
-在全局或项目级 `opencode.json` 的 `plugin` 数组中加入：
+OpenCode V1：在全局或项目级 `opencode.json` 的 `plugin` 数组中加入：
 
 ```json
 {
   "plugin": [
+    "superpowers@git+https://github.com/AreChen/superpowers-zh.git"
+  ]
+}
+```
+
+OpenCode V2（2.0.4 或更高版本）使用 `plugins` 数组：
+
+```json
+{
+  "plugins": [
     "superpowers@git+https://github.com/AreChen/superpowers-zh.git"
   ]
 }
@@ -272,6 +285,22 @@ pi -e /path/to/superpowers-zh
 
 Pi 软件包会加载 Superpowers 技能，并通过一个小型扩展在会话启动和上下文压缩后注入 `using-superpowers` 引导。Pi 原生支持技能，因此不需要兼容性的 `Skill` 工具。子 Agent 和任务列表工具仍可作为可选的 Pi 配套软件包使用。
 
+### Qwen Code
+
+Qwen Code 可以直接从 Claude Code 插件市场安装插件。
+
+从本仓库安装，并在提示时选择 `superpowers`：
+
+```bash
+qwen extensions install AreChen/superpowers-zh
+```
+
+后续更新：
+
+```bash
+qwen extensions update superpowers
+```
+
 ### Hermes Agent
 
 从本中文仓库安装 Hermes 插件：
@@ -282,15 +311,42 @@ hermes plugins install AreChen/superpowers-zh --enable
 
 安装后重启正在运行的 Hermes 会话。注意：Hermes 没有上下文压缩后的钩子；如果超长会话在第一轮之后发生压缩并导致技能停止触发，请启动新会话。
 
+### Muse
+
+Superpowers 提供原生 Muse 插件，与其他运行平台共用同一仓库和技能。`using-superpowers` 引导通过原生 `SessionStart` 钩子注入，无需每个会话单独启用。
+
+从当前本地检出目录安装：
+
+```bash
+muse plugins install ./
+muse plugins approve superpowers
+```
+
+也可以先克隆再安装：
+
+```bash
+git clone https://github.com/AreChen/superpowers-zh.git
+muse plugins install ./superpowers-zh
+muse plugins approve superpowers
+```
+
+后续更新：
+
+```bash
+muse plugins update superpowers
+```
+
+安装后重启正在运行的 Muse 会话，让 `SessionStart` 钩子生效。技能会立即启用，但首次安装时需要批准钩子。可在新会话中发送“我们来做一个 React 待办应用”验证：安装正常时，会先自动触发 `brainstorming`，再编写代码。版本由 `.version-bump.json` 跟踪，`scripts/bump-version.sh` 会同步更新。
+
 ## 基本工作流
 
-1. **brainstorming** —— 在编写代码前触发。通过提问澄清初步想法、探索替代方案，分段展示设计供用户确认，并保存设计文档。
+1. **brainstorming** —— 在构建任何内容前触发。通过提问了解你真正想要什么以及原因，再复述理解供你纠正。小改动在对话中达成一致；项目则形成可供实现者据此编写计划的设计文档。
 
 2. **using-git-worktrees** —— 设计获批后触发。在新分支上创建隔离工作区，完成项目初始化，并验证测试基线干净。
 
 3. **writing-plans** —— 获得批准的设计后触发。把工作拆分为小型任务，每项任务通常需要 2–5 分钟，并包含准确的文件路径、完整代码和验证步骤。
 
-4. **subagent-driven-development** 或 **executing-plans** —— 计划完成后触发。前者为每项任务派遣新的子 Agent，并进行规格符合性和代码质量两阶段审查；后者按批次执行，并在关键节点等待人工确认。
+4. **subagent-driven-development** 或 **executing-plans** —— 计划完成后触发。子 Agent 驱动模式为每项任务派遣新的子 Agent，并在继续下一项任务前审查。原生（内联）模式由当前会话完成所有任务，最后对整个分支进行一次审查；成本更低、速度更快，但任务之间没有独立审查。
 
 5. **test-driven-development** —— 实施期间触发。强制执行“红灯—绿灯—重构”：先写失败测试并确认失败，再编写最小实现并确认通过，然后提交。测试之前编写的生产代码需要删除并重新按 TDD 实现。
 
@@ -299,6 +355,12 @@ hermes plugins install AreChen/superpowers-zh --enable
 7. **finishing-a-development-branch** —— 全部任务完成后触发。验证测试并提供合并、创建 PR、保留或丢弃分支等选项，最后清理 worktree。
 
 **Agent 会在执行任何任务前检查是否存在相关技能。** 这些是必须遵循的工作流，而不是可选建议。
+
+## 出现问题时
+
+有时会话会出现异常：技能不该触发时触发、该触发时没有响应，或 Agent 忽略计划、重复工作、消耗的 token 超出预期。可以让编程 Agent“查明这个会话中 Superpowers 出了什么问题”，它会调用 **diagnosing-superpowers** 技能。要检查过去的会话，请指明会话：“查明会话 `<id>` 中 Superpowers 出了什么问题”。
+
+该技能读取会话记录，用精确到行的证据说明发生了什么，并可按你的要求打包脱敏材料，用于问题反馈。
 
 ## 社区
 
@@ -320,12 +382,13 @@ Superpowers 由 [Jesse Vincent](https://blog.fsck.com) 和 [Prime Radiant](https
 
 - **systematic-debugging** —— 四阶段根因分析流程，包含根因追踪、纵深防御和基于条件的等待技术。
 - **verification-before-completion** —— 在声称完成前用证据确认问题确实已经解决。
+- **diagnosing-superpowers** —— 诊断技能误触发或未触发、忽略计划、重复工作和异常成本等会话问题。
 
 **协作**
 
-- **brainstorming** —— 通过苏格拉底式提问完善设计。
+- **brainstorming** —— 在决定构建什么之前，先了解你真正想要什么以及原因。
 - **writing-plans** —— 编写详细实施计划。
-- **executing-plans** —— 带检查点的分批执行。
+- **executing-plans** —— 内联执行计划：一个上下文，一次最终审查。
 - **dispatching-parallel-agents** —— 并行子 Agent 工作流。
 - **requesting-code-review** —— 请求审查前的完整流程。
 - **receiving-code-review** —— 理解并处理审查反馈。
